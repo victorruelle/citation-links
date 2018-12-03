@@ -3,3 +3,7 @@ pandas
 matplotlib
 scipy
 plotly
+random
+igraph
+sklearn
+
