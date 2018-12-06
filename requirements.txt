@@ -1,9 +1,9 @@
 numpy
 pandas
-matplotlib
+matplotlib==2.0
 scipy
 plotly
-random
 igraph
 sklearn
-
+csv
+networkit
