@@ -196,7 +196,7 @@ print(training_scores[:size_viz])
 
 # saving the result
 with open(features_training, 'w') as myfile:
-    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+    wr = csv.writer(myfile, quoting=0)
     for row in training_scores:
         wr.writerow(row)
 print("Exported training edges features in " + features_training)
@@ -212,7 +212,7 @@ print(validation_scores[:size_viz])
 
 # saving the result
 with open(features_validation, 'w') as myfile:
-    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+    wr = csv.writer(myfile, quoting=0)
     for row in validation_scores:
         wr.writerow(row)
 print("Exported training edges features in " + features_validation)
