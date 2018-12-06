@@ -1,0 +1,6 @@
+Améliorer la description des mots :
+	Prendre en compte seulement les mots les plus "scientifiques"
+
+Sur les données venant des graphes :
+	Être sur que le modèle utilisé s'intéresse uniquement aux valeurs exploitables
+
