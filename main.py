@@ -1,0 +1,61 @@
+import vectorization as vect
+import predict as pred
+import csv
+from datetime.datetime import now
+
+
+#here we open and process the testing set, ie pairs of articles without a link
+with open("Data/testing_set.txt", "r") as f:
+	reader = csv.reader(f)
+	testing_set  = list(reader)
+	
+testing_set = [element[0].split(" ") for element in testing_set]
+#we obtain a list of lists of 2 strings
+
+#here we pre-process the training data
+with open("Data/training_set.txt", "r") as f:
+	reader = csv.reader(f)
+	training_set  = list(reader)
+
+training_set = [element[0].split(" ") for element in training_set]
+#we obtain a list of lists of 3 strings: the two articles IDs and 1 if there is a link, 0 otherwise
+
+with open("Data/node_information.csv", "r") as f:
+	reader = csv.reader(f)
+	node_info  = list(reader)
+
+
+# create a list with list with all the words for each info
+IDs = [int(element[0]) for element in node_info]
+years = [element[1] for element in node_info]
+corpus_title = [element[2].split(" ") for element in node_info]
+authors = [element[3].split(" ") for element in node_info]
+corpus_abstract = [element[5].split(" ") for element in node_info]
+
+def get_predictions_svm():
+    list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
+    metas = IDs,list_sims1,list_sims2,years,authors
+    X,Y = [],[]
+    for id1,id2,y in training_set:
+        Y.append(y)
+        X.append(vect.features(id1,id2,metas))
+    model = pred.train_svm(X,Y)
+
+    X2 = testing_set
+    Y2 = pred.predict_svm(model,X2)
+
+    return(Y2)
+
+
+def save_predictions(Y):
+    # saves a prediction list in the right format
+    # assumes predictions have been made in the "natural" order (that of testing_set)
+    name = "predictions_"+str(now().day)+"_"+str(now().month)+"_"+str(now().hour)+"h"+str(now().minute)
+    with open("Data/Processed/"+name+".dat",'w') as out:
+        out.write("id,category")
+        for i in range(len(Y)):
+            out.write(str(i)+","+str(Y[i]))
+
+if __name__ == "__main__":
+    Y = get_predictions_svm()
+    save_predictions(Y)
