@@ -11,8 +11,10 @@
 nodes_information_path = "../Data/node_information.csv"
 training_set_path = "../Data/Processed/edges_training.txt"
 validation_set_path = "../Data/Processed/edges_validation.txt"
+testing_set_path = "../Data/testing_set.txt"
 features_training = "../Data/Features/graph_features_training.csv"
 features_validation = "../Data/Features/graph_features_validation.csv"
+features_testing = "../Data/Features/graph_features_testing.csv"
 
 
 ### 2. Reads edge and node data and insert it in pandas DataFrame
@@ -40,29 +42,37 @@ for i,row in enumerate(nodes.values) :
     row[0] = i
 
 # reading data from edges
-print("Reading data from edges...")
+print("Reading data from training edges...")
 # reads training set
 colnames=['source', 'target', 'value']
 training_edges = pd.read_csv(training_set_path, names=colnames, sep = " ", dtype={
                 "source" : int,
                 "target" : int,
                 "value" : int
-            })
+            })   
+print("Reading data from validation edges...")
 validation_edges = pd.read_csv(validation_set_path, names=colnames, sep = " ", dtype={
                 "source" : int,
                 "target" : int,
                 "value" : int
             })
+print("Reading data from testing edges...")
+testing_edges = pd.read_csv(testing_set_path, names=colnames[:2], sep = " ", dtype={
+                "source" : int,
+                "target" : int
+            })
     
 # changes the IDs of the nodes with the new IDs
-for i,row in enumerate(training_edges.values):
-    row[0] = mapping[row[0]]
-    row[1] = mapping[row[1]]
+def changingIDs(array):
+    for i, row in enumerate(array):
+        row[0] = mapping[row[0]]
+        row[1] = mapping[row[1]]
+changingIDs(training_edges.values)
 training_edges = training_edges.values
-for i,row in enumerate(validation_edges.values):
-    row[0] = mapping[row[0]]
-    row[1] = mapping[row[1]]
+changingIDs(validation_edges.values)
 validation_edges = validation_edges.values
+changingIDs(testing_edges.values)
+testing_edges = testing_edges.values
     
     
     
@@ -70,16 +80,24 @@ validation_edges = validation_edges.values
 
 from networkit import *
 
+# graph on training set
 G = Graph()
+# graph on testing set
+G_ = Graph()
 
 # adding all the nodes
 for i,row in enumerate(nodes.values) :
     G.addNode()
+    G_.addNode()
     
 # adding all the edges (needs to be a 1 as third coordinate)
 for i,row in enumerate(training_edges):
     if row[2] == 1:
         G.addEdge(row[0],row[1])
+        G_.addEdge(row[0],row[1])
+for i,row in enumerate(validation_edges):
+    if row[2] == 1:
+        G_.addEdge(row[0],row[1])   
 
 
 ### 4. Creates the structures for edge transformation to vectors
@@ -182,42 +200,25 @@ def edgesToScore(predictors,edges):
     return scores
 
 predictors = createAllPredictors(G)
+predictors_ = createAllPredictors(G_)
 
 
-### 5. For training set, computes the score values of every edges (even the 0 ones)
-    
+### 5. Creates function for exporting scores
+
 import csv
-size_viz = 10
-# limiting the number of testing edges used for training
-print("Converting training edges to vectors...")
-training_scores = edgesToScore(predictors,training_edges)
-print("Training vectors:")
-print(training_scores[:size_viz])
-
-# saving the result
-with open(features_training, 'w') as myfile:
-    wr = csv.writer(myfile, quoting=0)
-    for row in training_scores:
-        wr.writerow(row)
-print("Exported training edges features in " + features_training)
-
-
-### 6. For the validation set, computes the score values of every edges
-
-# limiting the number of edges that will be transformed to vectors
-print("Converting validation edges to vectors...")
-validation_scores = edgesToScore(predictors,validation_edges)
-print("Validation vectors:")
-print(validation_scores[:size_viz])
-
-# saving the result
-with open(features_validation, 'w') as myfile:
-    wr = csv.writer(myfile, quoting=0)
-    for row in validation_scores:
-        wr.writerow(row)
-print("Exported training edges features in " + features_validation)
-
-
+def exportScores(name,predictors,edges,output_file):
+    print("Converting " + name + " edges to vectors...")
+    scores = edgesToScore(predictors,edges)
     
+    # saving the result
+    with open(output_file, 'w') as myfile:
+        wr = csv.writer(myfile, quoting=0)
+        for row in scores:
+            wr.writerow(row)
+    print("Exported " + name + " edges features in " + output_file)
 
+### 6. For training/validation/testing set, computes the score values of every edges (even the 0 ones)
 
+#exportScores("training",predictors,training_edges,features_training) 
+#exportScores("validation",predictors,validation_edges,features_validation) 
+exportScores("testing",predictors_,testing_edges,features_testing)
