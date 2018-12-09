@@ -72,7 +72,7 @@ if __name__ == "__main__":
 # get the graph features from training, validation or testing set
 def get_graph_features(set_name):
     with open("Data/Features/graph_features_"+set_name+".txt", "r") as f:
-	reader = csv.reader(f)
-	features  = list(reader)
+        reader = csv.reader(f)
+        features  = list(reader)
     return features
 graph_feeatures_testing = get_graph_features("testing")
