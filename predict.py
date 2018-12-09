@@ -8,6 +8,11 @@ from sklearn import svm
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 def train_svm(X,Y):
+    for x in X:
+        for el in x:
+            assert type(el)!=str, "found a string in X :"+str(el)+" in "+str(x)
+    for y in Y:
+        assert type(y)!=str, "found a string in Y : "+str(y)
     clf = svm.SVC(gamma='scale')
     clf.fit(X,Y)
     return clf

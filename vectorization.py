@@ -7,8 +7,6 @@ import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
-
-
 def compute_similarities(corpus_abstract,corpus_title):
 	#take out the words that only appear once
 	frequency1,frequency2 = defaultdict(int),defaultdict(int)
@@ -60,11 +58,12 @@ def compute_similarities(corpus_abstract,corpus_title):
 	#list(enumerate(sims1 or sims2)) gives a list of tuples (index of doc, array[(index of doc, similarity)])
 	#list(enumerate(sims1 or sims2))[i][1] is the array of similarities for doc i 
 
-	return list_sims1,list_sims2
 
-def save_sims():
+	save_sims(list_sims1,list_sims2)
+
+def save_sims(list_sims1,list_sims2):
 	with open("Data/Processed/list_sims1.dat","w") as sims1:
-		for line in sims1:
+		for line in list_sims1:
 			l = str(line[0])
 			for el in line[1]:
 				l += " "+str(el)
@@ -72,27 +71,28 @@ def save_sims():
 			sims1.write(l)
 
 	with open("Data/Processed/list_sims2.dat","w") as sims2:
-		for line in sims2:
+		for line in list_sims2:
 			l = str(line[0])
 			for el in line[1]:
 				l += " "+str(el)
 			l += "\n"
-			sims1.write(l)
+			sims2.write(l)
 			
 def recover_list_sims():
 	list_sims1,list_sims2 = [],[]
 	with open("Data/Processed/list_sims1.dat",'r') as sims1:
-		lines = sims1.readlines()
-		for line in lines:
-			line.strip(" \n").split(" ")
+		for line in sims1:
+			line = line.strip("\n").split(" ")
 			list_sims1.append([int(line[0]),[]])
 			for i in range(1,len(line)):
-				list_sims1[-1][-1].append(float(line[i]))
+				try:
+					list_sims1[-1][-1].append(float(line[i]))
+				except ValueError:
+					print("could not convert to float",line[i],len(line[i]),i,len(line),"with id",line[0])
 
 	with open("Data/Processed/list_sims2.dat",'r') as sims2:
-		lines = sims2.readlines()
-		for line in lines:
-			line.strip(" \n").split(" ")
+		for line in sims2:
+			line = line.strip("\n").split(" ")
 			list_sims2.append([int(line[0]),[]])
 			for i in range(1,len(line)):
 				list_sims2[-1][-1].append(float(line[i]))
