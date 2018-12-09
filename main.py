@@ -33,22 +33,20 @@ authors = [element[3].split(" ") for element in node_info]
 corpus_abstract = [element[5].split(" ") for element in node_info]
 
 def get_predictions_svm():
-    print("running")
-    #vect.compute_similarities(corpus_abstract,corpus_title)
-    #print(completed the computation and saving of similarity matrices)
-    list_sims1, list_sims2 = vect.recover_list_sims()
-    print("similarity matrices recovered")
+    print("---- running...")
+    list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
+    print("---- similarity matrices computed")
     metas = [IDs,list_sims1,list_sims2,years,authors]
     X,Y = [],[]
     for id1,id2,y in training_set:
         Y.append(y)
         X.append(vect.features(id1,id2,metas))
-    print("all parameters have been initialized")
+    print("---- all features have been computed")
     model = pred.train_svm(X,Y)
-    print("svm model has been trained")
+    print("---- svm model has been trained")
     X2 = testing_set
     Y2 = pred.predict_svm(model,X2)
-    print("predictions have been made")
+    print("---- predictions have been made")
     return(Y2)
 
 

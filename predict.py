@@ -13,7 +13,7 @@ def train_svm(X,Y):
             assert type(el)!=str, "found a string in X :"+str(el)+" in "+str(x)
     for y in Y:
         assert type(y)!=str, "found a string in Y : "+str(y)
-    clf = svm.SVC(gamma='scale')
+    clf = svm.SVC(gamma=0.001)
     clf.fit(X,Y)
     return clf
 

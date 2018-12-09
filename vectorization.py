@@ -58,8 +58,8 @@ def compute_similarities(corpus_abstract,corpus_title):
 	#list(enumerate(sims1 or sims2)) gives a list of tuples (index of doc, array[(index of doc, similarity)])
 	#list(enumerate(sims1 or sims2))[i][1] is the array of similarities for doc i 
 
-
-	save_sims(list_sims1,list_sims2)
+	return list_sims1,list_sims2
+	#save_sims(list_sims1,list_sims2)
 
 def save_sims(list_sims1,list_sims2):
 	with open("Data/Processed/list_sims1.dat","w") as sims1:
