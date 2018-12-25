@@ -64,7 +64,7 @@ def gather_features_of_set(name,metas):
 		file = open(graph_features_path,"r")
 		reader = csv.reader(file)
 		graph_features = list(reader)
-		graph_features = [[float(sub_element) for sub_element in element[0].split(" ")] for element in graph_features]
+		graph_features = [[float(sub_element) for sub_element in element] for element in graph_features]
 		print("Graph features have been loaded for %s"%name)
 	else:
 		# if it has not, prints an error message
@@ -78,7 +78,7 @@ def gather_features_of_set(name,metas):
 		file = open(text_features_path, "r")
 		reader = csv.reader(file)
 		text_features = list(reader)
-		text_features = [[float(sub_element) for sub_element in element[0].split(" ")] for element in text_features]
+		text_features = [[float(sub_element) for sub_element in element] for element in text_features]
 		print("Text features have been loaded for %s" % name)
 	else:
 		# if it has not, prints an error message
@@ -92,7 +92,7 @@ def gather_features_of_set(name,metas):
 		file = open(meta_features_path, "r")
 		reader = csv.reader(file)
 		meta_features = list(reader)
-		meta_features = [[float(sub_element) for sub_element in element[0].split(" ")] for element in meta_features]
+		meta_features = [[float(sub_element) for sub_element in element] for element in meta_features]
 		print("Meta features have been loaded for %s" % name)
 	else:
 		# if it has not, prints an error message
