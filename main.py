@@ -72,7 +72,18 @@ def get_predictions_svm():
     print("---- predictions have been made")
     return(Y2)
 
-
+def get_predictions_NN():
+	print("---- running...")
+	list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
+	print("---- similarity matrices computed")
+	metas = [IDs,list_sims1,list_sims2,years,authors]
+	X,Y = [],[]
+	for id1,id2,y in training_set:
+		Y.append(y)
+		X.append(vect.features(id1,id2,metas))
+	print("---- all features have been computed")
+	NN_pred = pred.create_NN(X,Y,testing_set)
+	return(NN_pred)
 
 ############################
 # 1.3) METHOD TO SAVE PREDICITONS IN THE RIGHT FORMAT
@@ -88,8 +99,9 @@ def save_predictions(Y):
     print("prediction successfully written to Data/Processed"+name)
 
 
-if __name__ == "__main__":
+if (__name__ == "__main__"):
+	Y = get_predictions_NN()
+	save_predictions(Y)
     # code to get and save the svm predictions.
-    Y = get_predictions_svm()
-    save_predictions(Y)
+    #Y = get_predictions_svm()
     

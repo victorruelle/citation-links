@@ -75,7 +75,7 @@ def train_predict_logits(testing_set,training_set,list_sims1,list_sims2):
 
 # 3) NN Classifier
 
-def create_NN(X_train, Y_train, X_test, Y_test):
+def create_NN(X_train, Y_train, X_test):
 	# fix random seed for reproducibility
 	numpy.random.seed(7)
 
@@ -103,11 +103,13 @@ def create_NN(X_train, Y_train, X_test, Y_test):
 	predictions = model.predict(X_test)
 	# round predictions
 	rounded = [round(x[0]) for x in predictions]
+	
+	return rounded
 
-	#calcule accuracy 
+	"""#calculate accuracy 
 	accuracy = 0
 	for i in range(len(predictions)):
 		if(predictions[i]==Y_test[i]):
 			accuracy+=1
 	accuracy/=len(predictions)
-	print("Accuracy : ",accuracy)
+	print("Accuracy : ",accuracy)"""

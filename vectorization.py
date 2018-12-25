@@ -142,10 +142,10 @@ def recover_list_sims():
 	return list_sims1,list_sims2
 
 
-# get the graph features from training, validation or testing set
+"""# get the graph features from training, validation or testing set
 def get_graph_features(set_name):
     with open("Data/Features/graph_features_"+set_name+".txt", "r") as f:
         reader = csv.reader(f)
         features  = list(reader)
     return features
-graph_features_testing = get_graph_features("testing")
+graph_features_testing = get_graph_features("testing")"""
