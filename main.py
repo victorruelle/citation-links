@@ -73,4 +73,4 @@ def get_graph_features(set_name):
         reader = csv.reader(f)
         features  = list(reader)
     return features
-graph_feeatures_testing = get_graph_features("testing")
+graph_features_testing = get_graph_features("testing")
