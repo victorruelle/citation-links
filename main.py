@@ -20,27 +20,29 @@ MAIN FILE
 
 #  1.1) READING DATA AND PLACING IT IN USABLE LISTS
 
+def loads_data(path,type):
+    # path is the path of the file to read
+    # type : testing|training|node_info
+    with open(path, "r") as f:
+        reader = csv.reader(f)
+        res = list(reader)
+    if type == "training" or type == "testing":
+        # each element: edgeA(int) edgeB(int) (value(0/1) if training)
+        res = [ [int(sub_element) for sub_element in element[0].split(" ")]
+                    for element in res]
+    # nothing to change with node_info
+    return res
+
 #here we open and process the testing set, ie pairs of articles without a link
-with open("Data/testing_set.txt", "r") as f:
-	reader = csv.reader(f)
-	testing_set  = list(reader)
-	
-testing_set = [element[0].split(" ") for element in testing_set]
+testing_set = loads_data("Data/edges_testing.txt","testing")
 #we obtain a list of lists of 2 strings
 
-#here we pre-process the training data
-with open("Data/training_set.txt", "r") as f:
-	reader = csv.reader(f)
-	training_set  = list(reader)
-
-training_set = [ [ int(sub_element) for sub_element in element[0].split(" ")] for element in training_set] # on converti directement en int!
+#here we pre-process the training and validation data
+training_set = loads_data("Data/Processed/edges_training.txt","training")
+validation_set = loads_data("Data/Processed/edges_validation.txt","training")
 #we obtain a list of lists of 3 strings: the two articles IDs and 1 if there is a link, 0 otherwise
 
-with open("Data/node_information.csv", "r") as f:
-	reader = csv.reader(f)
-	node_info  = list(reader)
-
-
+node_info = loads_data("Data/node_info.csv","node_info")
 # create a list with list with all the words for each info
 IDs = [int(element[0]) for element in node_info]
 years = [int(element[1]) for element in node_info]
@@ -74,14 +76,14 @@ def get_predictions_svm():
     return(Y_test)
 
 def get_predictions_NN():
-	print("---- running...")
-	list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
-	print("---- similarity matrices computed")
-	metas = [IDs,list_sims1,list_sims2,years,authors]
-	data_set,Y_train = [],[]
-	for id1,id2,y in training_set:
-		Y_train.append(y)
-		data_set.append([id1,id2])
+    print("---- running...")
+    list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
+    print("---- similarity matrices computed")
+    metas = [IDs,list_sims1,list_sims2,years,authors]
+    data_set,Y_train = [],[]
+    for id1,id2,y in training_set:
+        Y_train.append(y)
+        data_set.append([id1,id2])
 	X_train = vect.features_all(data_set,metas)
 	print("---- all features have been computed")
 	X_test = vect.features_all(testing_set,metas)
@@ -103,8 +105,7 @@ def save_predictions(Y):
 
 
 if (__name__ == "__main__"):
-	Y = get_predictions_NN()
-	save_predictions(Y)
+    Y = get_predictions_NN()
+    save_predictions(Y)
     # code to get and save the svm predictions.
     #Y = get_predictions_svm()
-    
