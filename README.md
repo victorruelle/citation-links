@@ -10,7 +10,7 @@ The meta-method "features.py" uses all available methods to produce a composite 
 ## 2) predict.py 
 
 Groups all the implemented prediction methods.  
-Every method should have a train and predict method with normalized entries : X_train, Y_train, X_test, Y_test  
+Every method should have a train and predict method with normalized entries ( X\_train, Y\_train, X\_test ) and ouputs ( Y\_test )  
 The logits classifier written by Jo does not conform yet, but we probably won't need it in the future?
 
 ## 3) main.py
