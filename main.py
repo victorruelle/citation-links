@@ -1,6 +1,7 @@
 import vectorization as vect
-#import predict as pred
+import predict as pred
 import csv
+import numpy as np
 from datetime import datetime
 
 '''
@@ -103,18 +104,23 @@ def save_predictions(Y):
     # saves a prediction list in the right format
     # assumes predictions have been made in the "natural" order (that of testing_set)
     name = "predictions_"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)
-    with open("Data/Processed/"+name+".dat",'w') as out:
-        out.write("id,category")
+    with open("Predictions/"+name+".txt",'w') as out:
+        out.write("id,category\n")
         for i in range(len(Y)):
-            out.write(str(i)+","+str(Y[i]))
-    print("prediction successfully written to Data/Processed"+name)
+            out.write(str(i)+","+str(int(Y[i]))+"\n")
+    print("prediction successfully written to Predictions/"+name)
 
 
 if (__name__ == "__main__"):
-    vect.get_features_of_set("training",metas)
-    vect.get_features_of_set("validation",metas)
-    vect.get_features_of_set("testing",metas)
+    X_training = vect.get_features_of_set("training",metas)
+    y_training = [e[2] for e in training_set]
+    X_validation = vect.get_features_of_set("validation",metas)
+    y_validation = [e[2] for e in validation_set]
+    testing_features = vect.get_features_of_set("testing",metas)
+    nn = pred.NNClassfier(len(X_training[0]))
+    nn.fit(np.array(X_training),np.array(y_training),epochs=1)
+    Y = nn.predict(np.array(testing_features))
     #Y = get_predictions_NN()
-    #save_predictions(Y)
+    save_predictions(list(Y))
     # code to get and save the svm predictions.
     #Y = get_predictions_svm()

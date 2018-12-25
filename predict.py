@@ -76,40 +76,83 @@ def train_predict_logits(testing_set,training_set,list_sims1,list_sims2):
 # 3) NN Classifier
 
 def create_NN(X_train, Y_train, X_test):
-	# fix random seed for reproducibility
-	numpy.random.seed(7)
+    # fix random seed for reproducibility
+    numpy.random.seed(7)
 
-	# create model
-	model = Sequential()
-	#change numbers and number of features
-	#Dense is fully connected, maybe make it half connected?
-	#change number of layers
-	model.add(Dense(12, input_dim=0, activation='relu'))
-	model.add(Dense(8, activation='relu'))
-	model.add(Dense(1, activation='sigmoid'))
+    # create model
+    model = Sequential()
+    #change numbers and number of features
+    #Dense is fully connected, maybe make it half connected?
+    #change number of layers
+    model.add(Dense(12, input_dim=0, activation='relu'))
+    model.add(Dense(8, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
 
-	# Compile model
-	#use adaboost as an optimizer? need further investigation
-	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # Compile model
+    #use adaboost as an optimizer? need further investigation
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-	# Fit the model
-	model.fit(X_train, Y_train, epochs=150, batch_size=10)
+    # Fit the model
+    model.fit(X_train, Y_train, epochs=150, batch_size=10)
 
-	# evaluate the model
-	#scores = model.evaluate(X, Y)
-	#print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+    # evaluate the model
+    #scores = model.evaluate(X, Y)
+    #print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-	# calculate predictions
-	predictions = model.predict(X_test)
-	# round predictions
-	rounded = [round(x[0]) for x in predictions]
+    # calculate predictions
+    predictions = model.predict(X_test)
+    # round predictions
+    rounded = [round(x[0]) for x in predictions]
 	
-	return rounded
+    return rounded
 
-	"""#calculate accuracy 
+    """#calculate accuracy 
 	accuracy = 0
 	for i in range(len(predictions)):
 		if(predictions[i]==Y_test[i]):
 			accuracy+=1
 	accuracy/=len(predictions)
 	print("Accuracy : ",accuracy)"""
+
+
+class NNClassfier:
+    def __init__(self,n_input):# fix random seed for reproducibility
+        numpy.random.seed(7)
+
+        # create model
+        self.model = Sequential()
+        #change numbers and number of features
+        #Dense is fully connected, maybe make it half connected?
+        #change number of layers
+        self.model.add(Dense(12, input_dim=n_input, activation='relu'))
+        self.model.add(Dense(8, activation='relu'))
+        self.model.add(Dense(1, activation='sigmoid'))
+
+        # Compile model
+        #use adaboost as an optimizer? need further investigation
+        self.model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+        self.fitted = False
+
+    def fit(self,X_train,y_train,epochs=150):
+        self.model.fit(X_train, y_train, epochs=epochs, batch_size=10)
+        self.fitted = True
+
+    def predict(self,X):
+        if not self.fitted:
+            print("ERROR: model not fitted")
+            return
+        predictions = self.model.predict(X)
+        rounded = [round(x[0]) for x in predictions]
+        print(rounded)
+        return rounded
+
+    def accuracy(self,X,y):
+        predictions = self.predict(X)
+        accuracy = 0
+        for i in range(len(predictions)):
+            if (predictions[i] == y[i]):
+                accuracy += 1
+        accuracy /= len(predictions)
+        print("Accuracy : ", accuracy)
+        return accuracy
