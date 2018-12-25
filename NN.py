@@ -1,6 +1,11 @@
 from keras.models import Sequential
 from keras.layers import Dense
 import numpy
+
+'''
+THIS FILE HAS BEEN INCORPORATED IN PREDICTION.PY, WILL BE DELETED AFTER CONFIRMATION
+'''
+
 def create_NN(X_train, Y_train, X_test, Y_test):
 	# fix random seed for reproducibility
 	numpy.random.seed(7)

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-
-
+'''
+THIS FILE CONTAINS ALL OF ZUCCHET'S CODE
+MUST BE INCORPORATED IN PREDICTION.PY
+'''
 
 features_training_path = "Data/Features/graph_features_training.csv"
 features_validation_path = "Data/Features/graph_features_validation.csv"
 nodes_information_path = "Data/node_information.csv"
 training_set_path = "Data/Processed/edges_training.txt"
 validation_set_path = "Data/Processed/edges_validation.txt"
-
 
 import pandas as pd
 

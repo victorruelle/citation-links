@@ -7,6 +7,49 @@ import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
+'''
+THIS FILE CONTAINS METHODS TO COMPUTE DESCRIPTORS FOR OUR DATA
+
+THE MAIN METHOD IS features(id1,id2,metas) WHICH SHOULD INCLUDE ALL THE VECTORIZATION 
+METHODS THAT WE WANT TO USE TOGETHER. ONLY ZUCHET'S FEATURES NEED TO BE ADDED.
+
+OTHER 'SUPPORT' METHODS:
+	1) comput_similarities : Jo's code, computes sims between titles and abstracts (long)
+	2) save_sims : save similarity matrices from Jo's code. DO NOT USE as it as (10Go files...).
+		WILL ERASE PREVIOUS SAVES WHEN CALLED!
+	3) recover_list_sims : recover saved sims 
+	4) get_graph_features : recover saved graph features (Zuc.)
+'''
+
+
+def features(id1,id2,metas):
+	# must return the vector representation of the link (id1,id2)
+	# id1 and id2 are relative to the indexation in node_info !
+	# metas contain all the information lists 
+	IDs,list_sims1,list_sims2,years,authors = metas
+	features = []
+
+	# converting to the indexing used in the feature lists
+	id1 = IDs.index(id1)
+	id2 = IDs.index(id2)
+
+	# adding the similarities between titles and descriptions
+	features.append(list_sims1[id1][1][id2])
+	features.append(list_sims2[id1][1][id2])
+
+	# adding years difference
+	features.append(abs(years[id1]-years[id2]))
+	
+	# adding number of common authors ( we can learn author habits )
+	a1 = authors[id1]
+	a2 = authors[id2]
+	n = len(set(a1).intersection(set(a2)))
+	features.append(n)
+
+	return features
+
+
+
 def compute_similarities(corpus_abstract,corpus_title):
 	#take out the words that only appear once
 	frequency1,frequency2 = defaultdict(int),defaultdict(int)
@@ -99,28 +142,10 @@ def recover_list_sims():
 	return list_sims1,list_sims2
 
 
-def features(id1,id2,metas):
-	# must return the vector representation of the link (id1,id2)
-	# id1 and id2 are relative to the indexation in node_info !
-	# metas contain all the information lists 
-	IDs,list_sims1,list_sims2,years,authors = metas
-	features = []
-
-	# converting to the indexing used in the feature lists
-	id1 = IDs.index(id1)
-	id2 = IDs.index(id2)
-
-	# adding the similarities between titles and descriptions
-	features.append(list_sims1[id1][1][id2])
-	features.append(list_sims2[id1][1][id2])
-
-	# adding years difference
-	features.append(abs(years[id1]-years[id2]))
-	
-	# adding number of common authors ( we can learn author habits )
-	a1 = authors[id1]
-	a2 = authors[id2]
-	n = len(set(a1).intersection(set(a2)))
-	features.append(n)
-
-	return features
+# get the graph features from training, validation or testing set
+def get_graph_features(set_name):
+    with open("Data/Features/graph_features_"+set_name+".txt", "r") as f:
+        reader = csv.reader(f)
+        features  = list(reader)
+    return features
+graph_features_testing = get_graph_features("testing")

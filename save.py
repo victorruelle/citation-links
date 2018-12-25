@@ -3,22 +3,10 @@ import predict as pred
 import csv
 from datetime import datetime
 
+
 '''
-MAIN FILE
-
-1. CONTAINS : 
-    1.1) CODE TO READ THE DATA AND PLACE IT IN USABLE LISTS
-    1.1) METHODS TO GET PREDICTIONS USING VECTORIZATION METHODS FROM vectorization.py
-    AND PREDICTION METHODS FROM prediction.py
-    1.2) METHOD TO SAVE A PREDICTION IN THE RIGHT FORMAT
-
-2. WHEN main.py IS CALLED :
-    1) READS THE DATA AND PLACES IT IN USABLE LISTS
-    2) EXECUTES WHATEVER IS IN THE if __name__=='__main__' LOOP
+DUPLICATE OF MAIN.PY TO BE DELETED ??
 '''
-
-
-#  1.1) READING DATA AND PLACING IT IN USABLE LISTS
 
 #here we open and process the testing set, ie pairs of articles without a link
 with open("Data/testing_set.txt", "r") as f:
@@ -48,34 +36,21 @@ corpus_title = [element[2].split(" ") for element in node_info]
 authors = [element[3].split(" ") for element in node_info]
 corpus_abstract = [element[5].split(" ") for element in node_info]
 
-
-############################
-# 1.2) METHODS TO GET PREDICTIONS USING VECTORIZATION METHODS FROM vectorization.py
-#      AND PREDICTION METHODS FROM prediction.py
-
-
-# SVM prediction
 def get_predictions_svm():
-    print("---- running...")
-    list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
-    print("---- similarity matrices computed")
-    metas = [IDs,list_sims1,list_sims2,years,authors]
+    vect.compute_similarities(corpus_abstract,corpus_title)
+    list_sims1, list_sims2 = vect.recover_list_sims()
+    metas = IDs,list_sims1,list_sims2,years,authors
     X,Y = [],[]
     for id1,id2,y in training_set:
         Y.append(y)
         X.append(vect.features(id1,id2,metas))
-    print("---- all features have been computed")
     model = pred.train_svm(X,Y)
-    print("---- svm model has been trained")
+
     X2 = testing_set
     Y2 = pred.predict_svm(model,X2)
-    print("---- predictions have been made")
+
     return(Y2)
 
-
-
-############################
-# 1.3) METHOD TO SAVE PREDICITONS IN THE RIGHT FORMAT
 
 def save_predictions(Y):
     # saves a prediction list in the right format
@@ -85,11 +60,7 @@ def save_predictions(Y):
         out.write("id,category")
         for i in range(len(Y)):
             out.write(str(i)+","+str(Y[i]))
-    print("prediction successfully written to Data/Processed"+name)
-
 
 if __name__ == "__main__":
-    # code to get and save the svm predictions.
     Y = get_predictions_svm()
     save_predictions(Y)
-    

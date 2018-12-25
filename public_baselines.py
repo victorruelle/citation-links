@@ -106,7 +106,7 @@ temp_diff = []
 comm_auth = []
 
 counter = 0
-for i in xrange(len(training_set_reduced)):
+for i in range(len(training_set_reduced)):
     source = training_set_reduced[i][0]
     target = training_set_reduced[i][1]
     
@@ -135,7 +135,7 @@ for i in xrange(len(training_set_reduced)):
    
     counter += 1
     if counter % 1000 == True:
-       print counter, "training examples processsed"
+       print(counter, "training examples processsed")
 
 # convert list of lists into array
 # documents as rows, unique words as columns (i.e., example as rows, features as columns)
@@ -163,18 +163,9 @@ temp_diff_test = []
 comm_auth_test = []
    
 counter = 0
-for i in xrange(len(testing_set)):
+for i in range(len(testing_set)):
     source = testing_set[i][0]
     target = testing_set[i][1]
-    
-    index_source = IDs.index(source)
-    index_target = IDs.index(target)
-    
-    source = training_set_reduced[i][0]
-    target = training_set_reduced[i][1]
-    
-    index_source = IDs.index(source)
-    index_target = IDs.index(target)
     
     source_info = [element for element in node_info if element[0]==source][0]
     target_info = [element for element in node_info if element[0]==target][0]
@@ -196,7 +187,7 @@ for i in xrange(len(testing_set)):
    
     counter += 1
     if counter % 1000 == True:
-        print counter, "testing examples processsed"
+        print(counter, "testing examples processsed")
         
 # convert list of lists into array
 # documents as rows, unique words as columns (i.e., example as rows, features as columns)
