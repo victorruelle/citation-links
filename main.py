@@ -78,9 +78,10 @@ def get_predictions_NN():
 	print("---- similarity matrices computed")
 	metas = [IDs,list_sims1,list_sims2,years,authors]
 	X,Y = [],[]
-	for id1,id2,y in training_set:
-		Y.append(y)
-		X.append(vect.features(id1,id2,metas))
+    for id1,id2,y in training_set:
+        Y.append(y)
+        data_set.append([id1,id2])
+    X = vect.features_all(data_set)
 	print("---- all features have been computed")
 	NN_pred = pred.create_NN(X,Y,testing_set)
 	return(NN_pred)

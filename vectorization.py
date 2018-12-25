@@ -21,6 +21,38 @@ OTHER 'SUPPORT' METHODS:
 	4) get_graph_features : recover saved graph features (Zuc.)
 '''
 
+def features_all(data_set,metas):
+	# must return the vector representation of the link (id1,id2)
+	# id1 and id2 are relative to the indexation in node_info !
+	# metas contain all the information lists 
+	IDs,list_sims1,list_sims2,years,authors = metas
+
+	X,Y = [],[]
+	for id1,id2 in data_set:
+		Y.append(y)
+		x = []
+
+		# converting to the indexing used in the feature lists
+		id1 = IDs.index(id1)
+		id2 = IDs.index(id2)
+
+		# adding the similarities between titles and descriptions
+		x.append(list_sims1[id1][1][id2])
+		x.append(list_sims2[id1][1][id2])
+
+		# adding years difference
+		x.append(abs(years[id1]-years[id2]))
+
+		# adding number of common authors ( we can learn author habits )
+		a1 = authors[id1]
+		a2 = authors[id2]
+		n = len(set(a1).intersection(set(a2)))
+		x.append(n)
+
+		X.append(x)
+
+
+	return features
 
 def features(id1,id2,metas):
 	# must return the vector representation of the link (id1,id2)
