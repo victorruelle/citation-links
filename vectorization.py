@@ -10,8 +10,10 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 '''
 THIS FILE CONTAINS METHODS TO COMPUTE DESCRIPTORS FOR OUR DATA
 
-THE MAIN METHOD IS features(id1,id2,metas) WHICH SHOULD INCLUDE ALL THE VECTORIZATION 
-METHODS THAT WE WANT TO USE TOGETHER. ONLY ZUCHET'S FEATURES NEED TO BE ADDED.
+THE MAIN METHODS ARE
+	1) features_all(data_set,metas) : takes a data_set = list of (id1,id2) and computes the entire X feature vector
+  	SHOULD INCLUDE ALL THE VECTORIZATION METHODS THAT WE WANT TO USE TOGETHER. ONLY ZUCHET'S FEATURES NEED TO BE ADDED.
+	2) features(id1,id2,metas) : does the same but for a single link (much to slow because of data passes in metas)
 
 OTHER 'SUPPORT' METHODS:
 	1) comput_similarities : Jo's code, computes sims between titles and abstracts (long)
@@ -22,14 +24,15 @@ OTHER 'SUPPORT' METHODS:
 '''
 
 def features_all(data_set,metas):
-	# must return the vector representation of the link (id1,id2)
+	# must return the vector representation of the all the links (id1,id2) in data_set
 	# id1 and id2 are relative to the indexation in node_info !
 	# metas contain all the information lists 
 	IDs,list_sims1,list_sims2,years,authors = metas
 
-	X,Y = [],[]
+
+	features = []
+
 	for id1,id2 in data_set:
-		Y.append(y)
 		x = []
 
 		# converting to the indexing used in the feature lists
@@ -49,12 +52,14 @@ def features_all(data_set,metas):
 		n = len(set(a1).intersection(set(a2)))
 		x.append(n)
 
-		X.append(x)
+		features.append(x)
 
 
 	return features
 
 def features(id1,id2,metas):
+	# MUCH TOO SLOW! list_sims1 and list_sims2 in metas are much too big to be passed 
+	# aroun for a single link featuer
 	# must return the vector representation of the link (id1,id2)
 	# id1 and id2 are relative to the indexation in node_info !
 	# metas contain all the information lists 

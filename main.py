@@ -60,31 +60,32 @@ def get_predictions_svm():
     list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
     print("---- similarity matrices computed")
     metas = [IDs,list_sims1,list_sims2,years,authors]
-    X,Y = [],[]
-    for id1,id2,y in training_set:
-        Y.append(y)
-        X.append(vect.features(id1,id2,metas))
-    print("---- all features have been computed")
-    model = pred.train_svm(X,Y)
-    print("---- svm model has been trained")
-    X2 = testing_set
-    Y2 = pred.predict_svm(model,X2)
-    print("---- predictions have been made")
-    return(Y2)
-
-def get_predictions_NN():
-	print("---- running...")
-	list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
-	print("---- similarity matrices computed")
-	metas = [IDs,list_sims1,list_sims2,years,authors]
-	X,Y = [],[]
+    data_set,Y_train = [],[]
     for id1,id2,y in training_set:
         Y.append(y)
         data_set.append([id1,id2])
-    X = vect.features_all(data_set)
-	print("---- all features have been computed")
-	NN_pred = pred.create_NN(X,Y,testing_set)
-	return(NN_pred)
+    X_train = vect.features_all(data_set,metas)
+    print("---- all features have been computed")
+    model = pred.train_svm(X_train,Y_train)
+    print("---- svm model has been trained")
+    X_test = testing_set
+    Y_test = pred.predict_svm(model,X_test)
+    print("---- predictions have been made")
+    return(Y_test)
+
+def get_predictions_NN():
+    print("---- running...")
+    list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
+    print("---- similarity matrices computed")
+    metas = [IDs,list_sims1,list_sims2,years,authors]
+    data_set,Y_train = [],[]
+    for id1,id2,y in training_set:
+        Y_train.append(y)
+        data_set.append([id1,id2])
+    X_train = vect.features_all(data_set,metas)
+    print("---- all features have been computed")
+    NN_pred = pred.create_NN(X_train,Y_train,testing_set)
+    return(NN_pred)
 
 ############################
 # 1.3) METHOD TO SAVE PREDICITONS IN THE RIGHT FORMAT
