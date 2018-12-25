@@ -1,5 +1,5 @@
 import vectorization as vect
-import predict as pred
+#import predict as pred
 import csv
 from datetime import datetime
 
@@ -34,21 +34,27 @@ def loads_data(path,type):
     return res
 
 #here we open and process the testing set, ie pairs of articles without a link
-testing_set = loads_data("Data/edges_testing.txt","testing")
+print("Loading testing set...")
+testing_set = loads_data("Data/Processed/edges_testing.txt","testing")
 #we obtain a list of lists of 2 strings
 
 #here we pre-process the training and validation data
+print("Loading training set...")
 training_set = loads_data("Data/Processed/edges_training.txt","training")
+print("Loading validation set...")
 validation_set = loads_data("Data/Processed/edges_validation.txt","training")
 #we obtain a list of lists of 3 strings: the two articles IDs and 1 if there is a link, 0 otherwise
 
-node_info = loads_data("Data/node_info.csv","node_info")
+print("Loading node information...")
+node_info = loads_data("Data/node_information.csv","node_info")
 # create a list with list with all the words for each info
 IDs = [int(element[0]) for element in node_info]
 years = [int(element[1]) for element in node_info]
 corpus_title = [element[2].split(" ") for element in node_info]
 authors = [element[3].split(" ") for element in node_info]
 corpus_abstract = [element[5].split(" ") for element in node_info]
+metas = [IDs,years,authors,corpus_abstract,corpus_title]
+
 
 
 ############################
@@ -84,11 +90,11 @@ def get_predictions_NN():
     for id1,id2,y in training_set:
         Y_train.append(y)
         data_set.append([id1,id2])
-	X_train = vect.features_all(data_set,metas)
-	print("---- all features have been computed")
-	X_test = vect.features_all(testing_set,metas)
-	NN_pred = pred.create_NN(X_train,Y_train,X_test)
-	return(NN_pred)
+    X_train = vect.features_all(data_set,metas)
+    print("---- all features have been computed")
+    X_test = vect.features_all(testing_set,metas)
+    NN_pred = pred.create_NN(X_train,Y_train,X_test)
+    return(NN_pred)
 
 ############################
 # 1.3) METHOD TO SAVE PREDICITONS IN THE RIGHT FORMAT
@@ -105,7 +111,10 @@ def save_predictions(Y):
 
 
 if (__name__ == "__main__"):
-    Y = get_predictions_NN()
-    save_predictions(Y)
+    vect.get_features_of_set("training",metas)
+    vect.get_features_of_set("validation",metas)
+    vect.get_features_of_set("testing",metas)
+    #Y = get_predictions_NN()
+    #save_predictions(Y)
     # code to get and save the svm predictions.
     #Y = get_predictions_svm()
