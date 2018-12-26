@@ -1,6 +1,6 @@
 # The repository strucutre
 
-The structure and implementation of the methods are conceivede to allow for complete modularity between each step of the pipeline : pre-processing, vectorization and prediction
+The structure and implementation of the methods are conceived to allow for complete modularity between each step of the pipeline : pre-processing, vectorization and prediction
 
 ## 1) vectorization.py
 
