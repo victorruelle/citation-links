@@ -2,6 +2,7 @@ import vectorization as vect
 import predict as pred
 import csv
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 from datetime import datetime
 
@@ -13,8 +14,11 @@ MAIN FILE
     1.1) METHODS TO GET PREDICTIONS USING VECTORIZATION METHODS FROM vectorization.py
     AND PREDICTION METHODS FROM prediction.py
     1.2) METHOD TO SAVE A PREDICTION IN THE RIGHT FORMAT
+    
+2. DATA MINING AND VISUALIZATION
+    2.1) Plot a feature vs. another one with the chosen format
 
-2. WHEN main.py IS CALLED :
+3. WHEN main.py IS CALLED :
     1) READS THE DATA AND PLACES IT IN USABLE LISTS
     2) EXECUTES WHATEVER IS IN THE if __name__=='__main__' LOOP
 '''
@@ -153,9 +157,11 @@ def test(general_params,method_params,X_training,y_training,X_validation,y_valid
     pred_file = save_predictions(pred_Y)
     log_predictions(pred_file,method_params,general_params,accuracy)
 
+
+### 2. DATA MINING AND VIZ
+
+# informations on features
 # id, what it is, keep it
-
-
 features_info = [
     [0,"(Graph) Adamic adar",True],
     [1,"(Graph) Adjusted rand",True],
@@ -168,11 +174,28 @@ features_info = [
     [8,"(Graph) Total neighbors",True],
     [9,"(Graph) U degree",True],
     [10,"(Graph) V degree",True],
-    [11,"(Text) Abstract similitude",True],
-    [13,"(Text) Title similitude",True],
-    [14,"(Meta) Delta publication year",True],
-    [15,"(Meta) Number of common authors",True]
+    [11,"(Meta) Delta publication year",True],
+    [12,"(Meta) Number of common authors",True],
+    [13,"(Text) Abstract similitude",True],
+    [14,"(Text) Title similitude",True]
 ]
+
+def confront_features(features,labels,id1,id2,plot_type,name):
+    # plot_type : scatter_plot
+    positives, negatives = [], []
+    for i,l in enumerate(labels):
+        if l == 1:
+            positives.append(features[i])
+        else:
+            negatives.append(features[i])
+    positives = np.array(positives)
+    negatives = np.array(negatives)
+    if plot_type == "scatter_plot":
+        plt.scatter(positives[:,id1],positives[:,id2],marker="x",c="green")
+        plt.scatter(negatives[:,id1],negatives[:,id2],marker="x",c="red")
+        plt.savefig("%s.png"%name)
+        plt.show()
+
 
 if (__name__ == "__main__"):
     X_training = np.array(vect.get_features_of_set("training",metas))
@@ -180,10 +203,18 @@ if (__name__ == "__main__"):
     X_validation = np.array(vect.get_features_of_set("validation",metas))
     y_validation = np.array([e[2] for e in validation_set])
     X_testing = np.array(vect.get_features_of_set("testing",metas))
+    confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
+    confront_features(X_training[:2000],y_training[:2000],13,14,"scatter_plot","Abstract similitude vs. Title similitude")
+    confront_features(X_training[:2000],y_training[:2000],3,4,"scatter_plot","Neighborhood distance vs. Neighbors measure")
+    confront_features(X_training[:2000],y_training[:2000],2,8,"scatter_plot","Common neighbors vs. Total Neighborhood")
+
+    """
+    EXAMPLE FOR SVM
     general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
     for gamma in np.arange(0.0005,0.005,0.0005):
         method_params = { "gamma" : gamma, "selected_features" : "all"}
         test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
+    """
 
     # parameters to
 
