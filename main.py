@@ -2,6 +2,7 @@ import vectorization as vect
 import predict as pred
 import csv
 import numpy as np
+import os
 from datetime import datetime
 
 '''
@@ -103,24 +104,60 @@ def get_predictions_NN():
 def save_predictions(Y):
     # saves a prediction list in the right format
     # assumes predictions have been made in the "natural" order (that of testing_set)
-    name = "predictions_"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)
+    name = "predictions_"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
     with open("Predictions/"+name+".txt",'w') as out:
         out.write("id,category\n")
         for i in range(len(Y)):
             out.write(str(i)+","+str(int(Y[i]))+"\n")
     print("prediction successfully written to Predictions/"+name)
+    return name
+
+def log_predictions(file_name,params,accuracy):
+    log_file = "Predictions/log_predictions.txt"
+    headers = "accuracy,prediction_file,params\n"
+    if not os.path.isfile(log_file):
+        open(log_file,"w").write(headers)
+    file = open(log_file,"a")
+    file.write("%f;%s;%s\n" % (accuracy,file_name,str(params)))
+
+def test(params,X_training,y_training,X_validation,y_validation,X_testing):
+    # test a given set of params and save the output
+    assert "method" in params.keys()
+    n_training = params["n_training"]
+    n_validation = params["n_validation"]
+    # takes random part of the data
+    permutation_training = np.random.permutation(len(X_training))[:n_training]
+    permutation_validation = np.random.permutation(len(X_validation))[:n_validation]
+    X_training = X_training[permutation_training,:]
+    y_training = y_training[permutation_training]
+    X_validation = X_validation[permutation_validation,:]
+    y_validation = y_validation[permutation_validation]
+    print(params)
+    if params["method"] == "NN":
+        size_layers = params["size_layers"]
+        epochs = params["epochs"]
+        model = pred.NNClassfier(X_training.shape[1],size_layers)
+        model.fit(X_training,y_training,epochs=epochs)
+    accuracy = model.accuracy(X_validation,y_validation)
+    print(accuracy)
+    pred_Y = model.predict(X_testing)
+    pred_file = save_predictions(pred_Y)
+    log_predictions(pred_file,params,accuracy)
 
 
 if (__name__ == "__main__"):
-    X_training = vect.get_features_of_set("training",metas)
-    y_training = [e[2] for e in training_set]
-    X_validation = vect.get_features_of_set("validation",metas)
-    y_validation = [e[2] for e in validation_set]
-    testing_features = vect.get_features_of_set("testing",metas)
-    nn = pred.NNClassfier(len(X_training[0]))
-    nn.fit(np.array(X_training),np.array(y_training),epochs=1)
-    Y = nn.predict(np.array(testing_features))
-    #Y = get_predictions_NN()
-    save_predictions(list(Y))
+    X_training = np.array(vect.get_features_of_set("training",metas))
+    y_training = np.array([e[2] for e in training_set])
+    X_validation = np.array(vect.get_features_of_set("validation",metas))
+    y_validation = np.array([e[2] for e in validation_set])
+    X_testing = np.array(vect.get_features_of_set("testing",metas))
+    params = {"method":"NN","n_training":100000,"n_validation":5000,"epochs":1}
+    for n_1 in range(2,20,5):
+        for n_2 in range(2,20,5):
+            params["size_layers"] = [n_1,n_2]
+            test(params,X_training,y_training,X_validation,y_validation,X_testing)
+
+    # parameters to
+
     # code to get and save the svm predictions.
     #Y = get_predictions_svm()
