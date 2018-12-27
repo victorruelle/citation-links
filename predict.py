@@ -1,6 +1,7 @@
 import csv
 from collections import defaultdict
 from gensim import corpora, models, similarities
+import sklearn.utils.testing as t
 from sklearn.linear_model import LogisticRegression
 from keras.models import Sequential
 from keras.layers import Dense
@@ -20,20 +21,64 @@ THESE METHODS ARE CALLED BY MAIN.PY
 3) NN classifier : 
 '''
 
-# 1) SVM CLASSIFIER 
+# 0) DEFINITION OF A GENERIC CLASSIFIER CLASS
 
-def train_svm(X,Y):
-    for x in X:
-        for el in x:
-            assert type(el)!=str, "found a string in X :"+str(el)+" in "+str(x)
-    for y in Y:
-        assert type(y)!=str, "found a string in Y : "+str(y)
-    clf = svm.SVC(gamma=0.001)
-    clf.fit(X,Y)
-    return clf
+class Classifier():
 
-def predict_svm(clf,Y):
-    return clf.predict(Y)
+    def __init(self):
+        # define random seed to get the same results every time
+        numpy.random.seed(7)
+        self.fitted = False
+
+    def fit(self,X_training,y_training):
+        return
+    # will be defined in child classes
+
+    def predict(self,X):
+        return
+    # will be defined in child classes
+
+    def accuracy(self,X,y):
+        predictions = self.predict(X)
+        accuracy = 0
+        for i in range(len(predictions)):
+            if (predictions[i] == y[i]):
+                accuracy += 1
+        accuracy /= len(predictions)
+        print("Accuracy : ", accuracy)
+        return accuracy
+
+
+# 1) SVM CLASSIFIER
+
+class SVMClassifier(Classifier):
+    def __init__(self,gamma=0.001,features="all"):
+        # features is here to restrain the features used by the classifier
+        self.features = "all"
+        self.fitted = False
+        self.n_features = -1
+        self.classifier = svm.SVC(gamma=gamma)
+
+    def __features_to_array(self,start):
+        # start is an array with the ids of the features ([0,...,n_features-1])
+        # transforms it to keep only the feature defines in self.features
+        if self.features == "all":
+            return start
+        else:
+            # we assume there the features is an array
+            return self.features
+
+    def fit(self,X_training,y_training):
+        self.fitted = True
+        selected_features = self.__features_to_array(list(range(X_training.shape[0])))
+        self.classifier.fit(X_training[selected_features],y_training)
+
+    def predict(self,X):
+        if not self.fitted:
+            print("ERROR: model not fitted")
+            return
+        return self.classifier.predict()
+
 
 # 2) LOGITS CLASSIFIER
 
@@ -75,57 +120,17 @@ def train_predict_logits(testing_set,training_set,list_sims1,list_sims2):
 
 # 3) NN Classifier
 
-def create_NN(X_train, Y_train, X_test):
-    # fix random seed for reproducibility
-    numpy.random.seed(7)
-
-    # create model
-    model = Sequential()
-    #change numbers and number of features
-    #Dense is fully connected, maybe make it half connected?
-    #change number of layers
-    model.add(Dense(12, input_dim=0, activation='relu'))
-    model.add(Dense(8, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-
-    # Compile model
-    #use adaboost as an optimizer? need further investigation
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    # Fit the model
-    model.fit(X_train, Y_train, epochs=150, batch_size=10)
-
-    # evaluate the model
-    #scores = model.evaluate(X, Y)
-    #print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-
-    # calculate predictions
-    predictions = model.predict(X_test)
-    # round predictions
-    rounded = [round(x[0]) for x in predictions]
-	
-    return rounded
-
-    """#calculate accuracy 
-	accuracy = 0
-	for i in range(len(predictions)):
-		if(predictions[i]==Y_test[i]):
-			accuracy+=1
-	accuracy/=len(predictions)
-	print("Accuracy : ",accuracy)"""
-
-
 class NNClassfier:
-    def __init__(self,n_input):# fix random seed for reproducibility
-        numpy.random.seed(7)
+    def __init__(self,n_input,size_layers):# fix random seed for reproducibility
+
+        # creates a network with len(size_layers) + 2 layers
 
         # create model
         self.model = Sequential()
-        #change numbers and number of features
         #Dense is fully connected, maybe make it half connected?
-        #change number of layers
-        self.model.add(Dense(12, input_dim=n_input, activation='relu'))
-        self.model.add(Dense(8, activation='relu'))
+        self.model.add(Dense(size_layers[0], input_dim=n_input, activation='relu'))
+        for i in range(1,len(size_layers)):
+            self.model.add(Dense(size_layers[i], activation='relu'))
         self.model.add(Dense(1, activation='sigmoid'))
 
         # Compile model
@@ -143,16 +148,7 @@ class NNClassfier:
             print("ERROR: model not fitted")
             return
         predictions = self.model.predict(X)
-        rounded = [round(x[0]) for x in predictions]
-        print(rounded)
+        rounded = [int(round(x[0])) for x in predictions]
         return rounded
 
-    def accuracy(self,X,y):
-        predictions = self.predict(X)
-        accuracy = 0
-        for i in range(len(predictions)):
-            if (predictions[i] == y[i]):
-                accuracy += 1
-        accuracy /= len(predictions)
-        print("Accuracy : ", accuracy)
-        return accuracy
+
