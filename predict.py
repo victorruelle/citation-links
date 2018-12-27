@@ -16,9 +16,10 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 THIS FILE GROUPS ALL THE PREDICTION METHODS
 THESE METHODS ARE CALLED BY MAIN.PY
 
-1) SVM CLASSIFIER : a train and a predict method
+0) DEFINITION OF A CLASSIFIER : creates a template class for all the prediction models
+1) SVM CLASSIFIER : a svm classifier
 2) LOGITS CLASSIFIER : a train-predict all-in-one method
-3) NN classifier : 
+3) NN classifier : neural network
 '''
 
 # 0) DEFINITION OF A GENERIC CLASSIFIER CLASS
@@ -38,6 +39,7 @@ class Classifier():
         return
     # will be defined in child classes
 
+    # test accuracy of the model on (X,y)
     def accuracy(self,X,y):
         predictions = self.predict(X)
         accuracy = 0
@@ -77,7 +79,7 @@ class SVMClassifier(Classifier):
         if not self.fitted:
             print("ERROR: model not fitted")
             return
-        return self.classifier.predict()
+        return self.classifier.predict(X)
 
 
 # 2) LOGITS CLASSIFIER
