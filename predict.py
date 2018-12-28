@@ -19,7 +19,11 @@ THESE METHODS ARE CALLED BY MAIN.PY
 0) DEFINITION OF A CLASSIFIER : creates a template class for all the prediction models
 1) SVM CLASSIFIER : a svm classifier
 2) LOGITS CLASSIFIER : a train-predict all-in-one method
+<<<<<<< HEAD
 3) NN classifier : neural network
+=======
+3) NN CLASSIFIER : a neural network method
+>>>>>>> 63e684fa18689b8759c4ab511449c033d9b140d5
 '''
 
 # 0) DEFINITION OF A GENERIC CLASSIFIER CLASS
@@ -123,9 +127,9 @@ def train_predict_logits(testing_set,training_set,list_sims1,list_sims2):
 # 3) NN Classifier
 
 class NNClassfier:
-    def __init__(self,n_input,size_layers):# fix random seed for reproducibility
-
-        # creates a network with len(size_layers) + 2 layers
+    def __init__(self,n_input,size_layers):
+		# fix random seed for reproducibility
+        numpy.random.seed(7)
 
         # create model
         self.model = Sequential()
