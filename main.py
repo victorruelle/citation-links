@@ -157,6 +157,7 @@ def test(general_params,method_params,X_training,y_training,X_validation,y_valid
 	pred_Y = model.predict(X_testing)
 	pred_file = save_predictions(pred_Y)
 	log_predictions(pred_file,method_params,general_params,accuracy)
+	return accuracy
 
 
 ### 2. DATA MINING AND VIZ
@@ -204,16 +205,28 @@ if (__name__ == "__main__"):
 	X_validation = np.array(vect.get_features_of_set("validation",metas))
 	y_validation = np.array([e[2] for e in validation_set])
 	X_testing = np.array(vect.get_features_of_set("testing",metas))
-	confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
+	"""confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
 	confront_features(X_training[:2000],y_training[:2000],13,14,"scatter_plot","Abstract similitude vs. Title similitude")
 	confront_features(X_training[:2000],y_training[:2000],3,4,"scatter_plot","Neighborhood distance vs. Neighbors measure")
-	confront_features(X_training[:2000],y_training[:2000],2,8,"scatter_plot","Common neighbors vs. Total Neighborhood")
+	confront_features(X_training[:2000],y_training[:2000],2,8,"scatter_plot","Common neighbors vs. Total Neighborhood")"""
 	
+	general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
+	name = "SVM_comparison"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
+	gammas = np.arange(0.0005,0.005,0.001)
+	accuracies = []
+	for gamma in gammas:
+		method_params = { "gamma" : gamma, "selected_features" : "all"}
+		accuracies.append(test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing))
+	plt.scatter(gammas, accuracies)
+	plt.savefig("%s.png"%name)
+	plt.show()
+	
+""" EXAMPLE FOR NN	
 	general_params = {"method":"NN","n_training":20000,"n_validation":3000}
 
-	method_params = { "size_layers" : [12,12,12], "epochs" : 150}
+	method_params = { "size_layers" : [20,20,20], "epochs" : 2}
 	test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-	
+"""	
 """
     EXAMPLE FOR SVM
     general_params = {"method":"SVC","n_training":20000,"n_validation":3000}

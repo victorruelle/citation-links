@@ -1,0 +1,27 @@
+accuracy;prediction_file;general_params;method_params
+0.913667;predictions_31_12_16h19m33;{'size_layers': [12, 12, 12], 'epochs': 1};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.925667;predictions_31_12_16h21m6;{'size_layers': [20, 20, 20], 'epochs': 2};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.896667;predictions_31_12_16h21m36;{'size_layers': [30, 30, 30], 'epochs': 2};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.896000;predictions_31_12_16h22m6;{'size_layers': [20, 20, 20], 'epochs': 3};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.910667;predictions_31_12_16h22m38;{'size_layers': [20, 15, 15], 'epochs': 2};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.906333;predictions_31_12_16h23m3;{'size_layers': [20, 15, 15], 'epochs': 3};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.919000;predictions_31_12_16h23m47;{'size_layers': [20, 15, 15], 'epochs': 15};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.894333;predictions_31_12_16h24m32;{'size_layers': [20, 15, 15, 15], 'epochs': 15};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.917000;predictions_31_12_16h25m11;{'size_layers': [20, 15], 'epochs': 15};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.913000;predictions_31_12_16h25m57;{'size_layers': [20, 20], 'epochs': 15};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.863333;predictions_31_12_16h26m39;{'size_layers': [30, 20], 'epochs': 15};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.877667;predictions_31_12_16h28m54;{'size_layers': [10, 10, 10], 'epochs': 15};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.884333;predictions_31_12_16h29m38;{'size_layers': [15, 15, 15], 'epochs': 10};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.939333;predictions_31_12_16h30m26;{'size_layers': [20, 20, 20], 'epochs': 2};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.920000;predictions_31_12_16h38m33;{'size_layers': [20, 20, 20], 'epochs': 3};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.752000;predictions_31_12_16h38m52;{'size_layers': [20, 20, 20], 'epochs': 3};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.757000;predictions_31_12_16h39m23;{'size_layers': [20, 20, 20], 'epochs': 2};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.890667;predictions_31_12_16h39m45;{'size_layers': [20, 20, 20], 'epochs': 2};{'method': 'NN', 'n_training': 20000, 'n_validation': 3000}
+0.917000;predictions_31_12_16h42m15;{'gamma': 0.0005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.922333;predictions_31_12_16h51m11;{'gamma': 0.0005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.909667;predictions_31_12_16h52m16;{'gamma': 0.001, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.916667;predictions_31_12_16h56m22;{'gamma': 0.0005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.915333;predictions_31_12_16h57m39;{'gamma': 0.0015, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.905000;predictions_31_12_16h59m6;{'gamma': 0.0025, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.913333;predictions_31_12_17h0m26;{'gamma': 0.0035, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.911667;predictions_31_12_17h1m55;{'gamma': 0.0045000000000000005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}

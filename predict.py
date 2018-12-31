@@ -126,7 +126,7 @@ def train_predict_logits(testing_set,training_set,list_sims1,list_sims2):
 
 # 3) NN Classifier
 
-class NNClassfier:
+class NNClassfier(Classifier):
     def __init__(self,n_input,size_layers):
 		# fix random seed for reproducibility
         numpy.random.seed(7)
