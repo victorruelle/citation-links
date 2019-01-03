@@ -28,12 +28,22 @@ THESE METHODS ARE CALLED BY MAIN.PY
 
 # 0) DEFINITION OF A GENERIC CLASSIFIER CLASS
 
-class Classifier():
+class Classifier:
 
-    def __init(self):
+    def __init__(self,features):
         # define random seed to get the same results every time
         numpy.random.seed(7)
         self.fitted = False
+        self.features = features
+
+    def features_to_array(self,start):
+        # start is an array with the ids of the features ([0,...,n_features-1])
+        # transforms it to keep only the feature defines in self.features
+        if self.features == "all":
+            return start
+        else:
+            # we assume there the features is an array
+            return self.features
 
     def fit(self,X_training,y_training):
         return
@@ -60,30 +70,19 @@ class Classifier():
 class SVMClassifier(Classifier):
     def __init__(self,gamma=0.001,features="all"):
         # features is here to restrain the features used by the classifier
-        self.features = "all"
-        self.fitted = False
-        self.n_features = -1
+        super().__init__(features)
         self.classifier = svm.SVC(gamma=gamma)
-
-    def __features_to_array(self,start):
-        # start is an array with the ids of the features ([0,...,n_features-1])
-        # transforms it to keep only the feature defines in self.features
-        if self.features == "all":
-            return start
-        else:
-            # we assume there the features is an array
-            return self.features
 
     def fit(self,X_training,y_training):
         self.fitted = True
-        selected_features = self.__features_to_array(list(range(X_training.shape[0])))
-        self.classifier.fit(X_training[selected_features],y_training)
+        self.selected_features = self.features_to_array(list(range(X_training.shape[1])))
+        self.classifier.fit(X_training[:,self.selected_features],y_training)
 
     def predict(self,X):
         if not self.fitted:
             print("ERROR: model not fitted")
             return
-        return self.classifier.predict(X)
+        return self.classifier.predict(X[:,self.selected_features])
 
 
 # 2) LOGITS CLASSIFIER
@@ -126,10 +125,9 @@ def train_predict_logits(testing_set,training_set,list_sims1,list_sims2):
 
 # 3) NN Classifier
 
-class NNClassfier(Classifier):
-    def __init__(self,n_input,size_layers):
-		# fix random seed for reproducibility
-        numpy.random.seed(7)
+class NNClassifier(Classifier):
+    def __init__(self,n_input,size_layers,features="all"):
+        super().__init__(features)
 
         # create model
         self.model = Sequential()
@@ -143,17 +141,17 @@ class NNClassfier(Classifier):
         #use adaboost as an optimizer? need further investigation
         self.model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
-        self.fitted = False
 
-    def fit(self,X_train,y_train,epochs=150):
-        self.model.fit(X_train, y_train, epochs=epochs, batch_size=10)
+    def fit(self,X_train,y_train,epochs=5):
         self.fitted = True
+        self.selected_features = self.features_to_array(list(range(X_train.shape[1])))
+        self.model.fit(X_train[:,self.selected_features], y_train, epochs=epochs, batch_size=10)
 
     def predict(self,X):
         if not self.fitted:
             print("ERROR: model not fitted")
             return
-        predictions = self.model.predict(X)
+        predictions = self.model.predict(X[:,self.selected_features])
         rounded = [int(round(x[0])) for x in predictions]
         return rounded
 

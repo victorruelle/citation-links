@@ -126,38 +126,42 @@ def log_predictions(file_name,general_params,method_params,accuracy):
     file.write("%f;%s;%s;%s\n" % (accuracy,file_name,str(general_params),str(method_params)))
 
 def test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing):
-	print("entering test function...")
-	# test a given set of params and save the output"
-	assert "method" in general_params.keys()
-	n_training = general_params["n_training"]
-	n_validation = general_params["n_validation"]
-	# takes random part of the data
-	permutation_training = np.random.permutation(len(X_training))[:n_training]
-	permutation_validation = np.random.permutation(len(X_validation))[:n_validation]
-	X_training = X_training[permutation_training,:]
-	y_training = y_training[permutation_training]
-	X_validation = X_validation[permutation_validation,:]
-	y_validation = y_validation[permutation_validation]
-	print(general_params)
-	print(method_params)
+    print("entering test function...")
+    # test a given set of params and save the output"
+    assert "method" in general_params.keys()
+    n_training = general_params["n_training"]
+    n_validation = general_params["n_validation"]
+    selected_features = general_params["selected_features"]
+    # takes random part of the data
+    permutation_training = np.random.permutation(len(X_training))[:n_training]
+    permutation_validation = np.random.permutation(len(X_validation))[:n_validation]
+    X_training = X_training[permutation_training,:]
+    y_training = y_training[permutation_training]
+    X_validation = X_validation[permutation_validation,:]
+    y_validation = y_validation[permutation_validation]
+    print(general_params)
+    print(method_params)
     # For each method, create the model with the specific parameters
-	if general_params["method"] == "NN":
-		size_layers = method_params["size_layers"]
-		epochs = method_params["epochs"]
-		model = pred.NNClassfier(X_training.shape[1],size_layers)
-		model.fit(X_training,y_training,epochs=epochs)
-	if general_params["method"] == "SVC":
-		gamma = method_params["gamma"]
-		selected_features = method_params["selected_features"]
-		model = pred.SVMClassifier(gamma=gamma,features=selected_features)
-		model.fit(X_training,y_training)
-	# Test the model, saves a prediction for the testing set and log everything
-	accuracy = model.accuracy(X_validation,y_validation)
-	print(accuracy)
-	pred_Y = model.predict(X_testing)
-	pred_file = save_predictions(pred_Y)
-	log_predictions(pred_file,method_params,general_params,accuracy)
-	return accuracy
+    if general_params["method"] == "NN":
+        size_layers = method_params["size_layers"]
+        epochs = method_params["epochs"]
+        if selected_features == "all":
+            size_input = X_training.shape[1]
+        else:
+            size_input = len(selected_features)
+        model = pred.NNClassifier(size_input,size_layers,features=selected_features)
+        model.fit(X_training,y_training,epochs=epochs)
+    if general_params["method"] == "SVC":
+        gamma = method_params["gamma"]
+        model = pred.SVMClassifier(gamma=gamma,features=selected_features)
+        model.fit(X_training,y_training)
+    # Test the model, saves a prediction for the testing set and log everything
+    accuracy = model.accuracy(X_validation,y_validation)
+    print(accuracy)
+    pred_Y = model.predict(X_testing)
+    pred_file = save_predictions(pred_Y)
+    log_predictions(pred_file,method_params,general_params,accuracy)
+    return accuracy
 
 
 ### 2. DATA MINING AND VIZ
@@ -200,40 +204,64 @@ def confront_features(features,labels,id1,id2,plot_type,name):
 
 
 if (__name__ == "__main__"):
-	X_training = np.array(vect.get_features_of_set("training",metas))
-	y_training = np.array([e[2] for e in training_set])
-	X_validation = np.array(vect.get_features_of_set("validation",metas))
-	y_validation = np.array([e[2] for e in validation_set])
-	X_testing = np.array(vect.get_features_of_set("testing",metas))
-	"""confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
-	confront_features(X_training[:2000],y_training[:2000],13,14,"scatter_plot","Abstract similitude vs. Title similitude")
-	confront_features(X_training[:2000],y_training[:2000],3,4,"scatter_plot","Neighborhood distance vs. Neighbors measure")
-	confront_features(X_training[:2000],y_training[:2000],2,8,"scatter_plot","Common neighbors vs. Total Neighborhood")"""
-	
-	general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
-	name = "SVM_comparison"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
-	gammas = np.arange(0.0005,0.005,0.001)
-	accuracies = []
-	for gamma in gammas:
-		method_params = { "gamma" : gamma, "selected_features" : "all"}
-		accuracies.append(test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing))
-	plt.scatter(gammas, accuracies)
-	plt.savefig("%s.png"%name)
-	plt.show()
-	
-""" EXAMPLE FOR NN	
-	general_params = {"method":"NN","n_training":20000,"n_validation":3000}
+    X_training = np.array(vect.get_features_of_set("training",metas))
+    y_training = np.array([e[2] for e in training_set])
+    X_validation = np.array(vect.get_features_of_set("validation",metas))
+    y_validation = np.array([e[2] for e in validation_set])
+    X_testing = np.array(vect.get_features_of_set("testing",metas))
 
-	method_params = { "size_layers" : [20,20,20], "epochs" : 2}
-	test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-"""	
+    # features sorted according to information gain
+    best_features = [14,6,13,2,8,5,3,4,9,7,12,10,11,0,1]
+
+    acc_SVC, acc_NN = [],[]
+    for i in range(1,len(best_features)):
+        general_params_SVC = {"method": "SVC", "n_training": 20000, "n_validation": 3000, "selected_features": best_features[:i]}
+        method_params_SVC = {"gamma": 0.0005}
+        acc_SVC.append(test(general_params_SVC, method_params_SVC, X_training, y_training, X_validation, y_validation, X_testing))
+        general_params_NN = {"method": "NN", "n_training": 20000, "n_validation": 3000, "selected_features": best_features[:i]}
+        method_params_NN = { "size_layers" : [20,20,20], "epochs": 3}
+        acc_NN.append(test(general_params_NN, method_params_NN, X_training, y_training, X_validation, y_validation, X_testing))
+    plt.scatter(range(1,len(best_features)),acc_NN,color="blue")
+    plt.scatter(range(1,len(best_features)),acc_SVC,color="red")
+    plt.savefig("models(nb_features).png")
+    plt.show()
+
+
+    #method_params = {"size_layers": [20, 20, 20], "epochs": 2}
+    #test(general_params, method_params, X_training, y_training, X_validation, y_validation, X_testing)
+
+    """confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
+    confront_features(X_training[:2000],y_training[:2000],13,14,"scatter_plot","Abstract similitude vs. Title similitude")
+    confront_features(X_training[:2000],y_training[:2000],3,4,"scatter_plot","Neighborhood distance vs. Neighbors measure")
+    confront_features(X_training[:2000],y_training[:2000],2,8,"scatter_plot","Common neighbors vs. Total Neighborhood")"""
+
+
+""" TO PLOT ACCURACY VS GAMMA
+    general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
+    name = "SVM_comparison"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
+    gammas = np.arange(0.0005,0.005,0.001)
+    accuracies = []
+    for gamma in gammas:
+        method_params = { "gamma" : gamma, "selected_features" : "all"}
+        accuracies.append(test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing))
+    plt.scatter(gammas, accuracies)
+    plt.savefig("%s.png"%name)
+    plt.show()
+"""
+    
+""" EXAMPLE FOR NN
+    general_params = {"method":"NN","n_training":20000,"n_validation":3000,"selected_features":"all"}
+
+    method_params = { "size_layers" : [20,20,20], "epochs" : 2}
+    test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
+"""
 """
     EXAMPLE FOR SVM
     general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
     for gamma in np.arange(0.0005,0.005,0.0005):
         method_params = { "gamma" : gamma, "selected_features" : "all"}
         test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-	"""	
+    """    
     # parameters to
 
     # code to get and save the svm predictions.
