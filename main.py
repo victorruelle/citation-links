@@ -180,10 +180,11 @@ features_info = [
     [8,"(Graph) Total neighbors",True],
     [9,"(Graph) U degree",True],
     [10,"(Graph) V degree",True],
-    [11,"(Meta) Delta publication year",True],
-    [12,"(Meta) Number of common authors",True],
-    [13,"(Text) Abstract similitude",True],
-    [14,"(Text) Title similitude",True]
+    [11,"(Graph) Jaccard index",True],
+    [12,"(Meta) Delta publication year",True],
+    [13,"(Meta) Number of common authors",True],
+    [14,"(Text) Abstract similitude",True],
+    [15,"(Text) Title similitude",True]
 ]
 
 def confront_features(features,labels,id1,id2,plot_type,name):
@@ -204,6 +205,7 @@ def confront_features(features,labels,id1,id2,plot_type,name):
 
 
 if (__name__ == "__main__"):
+
     X_training = np.array(vect.get_features_of_set("training",metas))
     y_training = np.array([e[2] for e in training_set])
     X_validation = np.array(vect.get_features_of_set("validation",metas))
@@ -211,24 +213,23 @@ if (__name__ == "__main__"):
     X_testing = np.array(vect.get_features_of_set("testing",metas))
 
     # features sorted according to information gain
-    best_features = [14,6,13,2,8,5,3,4,9,7,12,10,11,0,1]
+    # TODO verify that Jacard is the first
+    best_features = [11,15,6,14,2,8,5,3,4,9,7,13,10,12,0,1]
 
+    """
     acc_SVC, acc_NN = [],[]
-    for i in range(1,len(best_features)):
+    for i in range(4,len(best_features)):
         general_params_SVC = {"method": "SVC", "n_training": 20000, "n_validation": 3000, "selected_features": best_features[:i]}
         method_params_SVC = {"gamma": 0.0005}
         acc_SVC.append(test(general_params_SVC, method_params_SVC, X_training, y_training, X_validation, y_validation, X_testing))
         general_params_NN = {"method": "NN", "n_training": 20000, "n_validation": 3000, "selected_features": best_features[:i]}
         method_params_NN = { "size_layers" : [20,20,20], "epochs": 3}
         acc_NN.append(test(general_params_NN, method_params_NN, X_training, y_training, X_validation, y_validation, X_testing))
-    plt.scatter(range(1,len(best_features)),acc_NN,color="blue")
-    plt.scatter(range(1,len(best_features)),acc_SVC,color="red")
+    plt.scatter(range(4,len(best_features)),acc_NN,color="blue")
+    plt.scatter(range(4,len(best_features)),acc_SVC,color="red")
     plt.savefig("models(nb_features).png")
     plt.show()
-
-
-    #method_params = {"size_layers": [20, 20, 20], "epochs": 2}
-    #test(general_params, method_params, X_training, y_training, X_validation, y_validation, X_testing)
+    """
 
     """confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
     confront_features(X_training[:2000],y_training[:2000],13,14,"scatter_plot","Abstract similitude vs. Title similitude")
