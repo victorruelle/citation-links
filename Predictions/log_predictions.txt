@@ -1,0 +1,10 @@
+accuracy;prediction_file;general_params;method_params
+0.913333;predictions_27_12_20h7m15;{'gamma': 0.0005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.912333;predictions_27_12_20h7m58;{'gamma': 0.001, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.919667;predictions_27_12_20h8m46;{'gamma': 0.0015, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.910667;predictions_27_12_20h9m36;{'gamma': 0.002, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.909000;predictions_27_12_20h10m37;{'gamma': 0.0025, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.916667;predictions_27_12_20h11m24;{'gamma': 0.003, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.906000;predictions_27_12_20h12m13;{'gamma': 0.0035, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.904000;predictions_27_12_20h13m6;{'gamma': 0.004, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.904000;predictions_27_12_20h25m33;{'gamma': 0.0045000000000000005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
