@@ -2,6 +2,8 @@ import vectorization as vect
 import predict as pred
 import csv
 import numpy as np
+import matplotlib.pyplot as plt
+import os
 from datetime import datetime
 
 '''
@@ -12,8 +14,11 @@ MAIN FILE
     1.1) METHODS TO GET PREDICTIONS USING VECTORIZATION METHODS FROM vectorization.py
     AND PREDICTION METHODS FROM prediction.py
     1.2) METHOD TO SAVE A PREDICTION IN THE RIGHT FORMAT
+    
+2. DATA MINING AND VISUALIZATION
+    2.1) Plot a feature vs. another one with the chosen format
 
-2. WHEN main.py IS CALLED :
+3. WHEN main.py IS CALLED :
     1) READS THE DATA AND PLACES IT IN USABLE LISTS
     2) EXECUTES WHATEVER IS IN THE if __name__=='__main__' LOOP
 '''
@@ -103,24 +108,133 @@ def get_predictions_NN():
 def save_predictions(Y):
     # saves a prediction list in the right format
     # assumes predictions have been made in the "natural" order (that of testing_set)
-    name = "predictions_"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)
+    name = "predictions_"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
     with open("Predictions/"+name+".txt",'w') as out:
         out.write("id,category\n")
         for i in range(len(Y)):
             out.write(str(i)+","+str(int(Y[i]))+"\n")
     print("prediction successfully written to Predictions/"+name)
+    return name
+
+def log_predictions(file_name,general_params,method_params,accuracy):
+    log_file = "Predictions/log_predictions.txt"
+    headers = "accuracy;prediction_file;general_params;method_params\n"
+    if not os.path.isfile(log_file):
+        open(log_file,"w").write(headers)
+    # the result is added to the log file to keep a trace of every test
+    file = open(log_file,"a")
+    file.write("%f;%s;%s;%s\n" % (accuracy,file_name,str(general_params),str(method_params)))
+
+def test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing):
+	print("entering test function...")
+	# test a given set of params and save the output"
+	assert "method" in general_params.keys()
+	n_training = general_params["n_training"]
+	n_validation = general_params["n_validation"]
+	# takes random part of the data
+	permutation_training = np.random.permutation(len(X_training))[:n_training]
+	permutation_validation = np.random.permutation(len(X_validation))[:n_validation]
+	X_training = X_training[permutation_training,:]
+	y_training = y_training[permutation_training]
+	X_validation = X_validation[permutation_validation,:]
+	y_validation = y_validation[permutation_validation]
+	print(general_params)
+	print(method_params)
+    # For each method, create the model with the specific parameters
+	if general_params["method"] == "NN":
+		size_layers = method_params["size_layers"]
+		epochs = method_params["epochs"]
+		model = pred.NNClassfier(X_training.shape[1],size_layers)
+		model.fit(X_training,y_training,epochs=epochs)
+	if general_params["method"] == "SVC":
+		gamma = method_params["gamma"]
+		selected_features = method_params["selected_features"]
+		model = pred.SVMClassifier(gamma=gamma,features=selected_features)
+		model.fit(X_training,y_training)
+	# Test the model, saves a prediction for the testing set and log everything
+	accuracy = model.accuracy(X_validation,y_validation)
+	print(accuracy)
+	pred_Y = model.predict(X_testing)
+	pred_file = save_predictions(pred_Y)
+	log_predictions(pred_file,method_params,general_params,accuracy)
+	return accuracy
+
+
+### 2. DATA MINING AND VIZ
+
+# informations on features
+# id, what it is, keep it
+features_info = [
+    [0,"(Graph) Adamic adar",True],
+    [1,"(Graph) Adjusted rand",True],
+    [2,"(Graph) Common Neighbors",True],
+    [3,"(Graph) Neighborhood distance",True],
+    [4,"(Graph) Neighbors measure",True],
+    [5,"(Graph) Prefential attachment",True],
+    [6,"(Graph) Ressource allocation",True],
+    [7,"(Graph) Same community",True],
+    [8,"(Graph) Total neighbors",True],
+    [9,"(Graph) U degree",True],
+    [10,"(Graph) V degree",True],
+    [11,"(Meta) Delta publication year",True],
+    [12,"(Meta) Number of common authors",True],
+    [13,"(Text) Abstract similitude",True],
+    [14,"(Text) Title similitude",True]
+]
+
+def confront_features(features,labels,id1,id2,plot_type,name):
+    # plot_type : scatter_plot
+    positives, negatives = [], []
+    for i,l in enumerate(labels):
+        if l == 1:
+            positives.append(features[i])
+        else:
+            negatives.append(features[i])
+    positives = np.array(positives)
+    negatives = np.array(negatives)
+    if plot_type == "scatter_plot":
+        plt.scatter(positives[:,id1],positives[:,id2],marker="x",c="green")
+        plt.scatter(negatives[:,id1],negatives[:,id2],marker="x",c="red")
+        plt.savefig("%s.png"%name)
+        plt.show()
 
 
 if (__name__ == "__main__"):
-    X_training = vect.get_features_of_set("training",metas)
-    y_training = [e[2] for e in training_set]
-    X_validation = vect.get_features_of_set("validation",metas)
-    y_validation = [e[2] for e in validation_set]
-    testing_features = vect.get_features_of_set("testing",metas)
-    nn = pred.NNClassfier(len(X_training[0]))
-    nn.fit(np.array(X_training),np.array(y_training),epochs=1)
-    Y = nn.predict(np.array(testing_features))
-    #Y = get_predictions_NN()
-    save_predictions(list(Y))
+	X_training = np.array(vect.get_features_of_set("training",metas))
+	y_training = np.array([e[2] for e in training_set])
+	X_validation = np.array(vect.get_features_of_set("validation",metas))
+	y_validation = np.array([e[2] for e in validation_set])
+	X_testing = np.array(vect.get_features_of_set("testing",metas))
+	"""confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
+	confront_features(X_training[:2000],y_training[:2000],13,14,"scatter_plot","Abstract similitude vs. Title similitude")
+	confront_features(X_training[:2000],y_training[:2000],3,4,"scatter_plot","Neighborhood distance vs. Neighbors measure")
+	confront_features(X_training[:2000],y_training[:2000],2,8,"scatter_plot","Common neighbors vs. Total Neighborhood")"""
+	
+	general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
+	name = "SVM_comparison"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
+	gammas = np.arange(0.0005,0.005,0.001)
+	accuracies = []
+	for gamma in gammas:
+		method_params = { "gamma" : gamma, "selected_features" : "all"}
+		accuracies.append(test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing))
+	plt.scatter(gammas, accuracies)
+	plt.savefig("%s.png"%name)
+	plt.show()
+	
+""" EXAMPLE FOR NN	
+	general_params = {"method":"NN","n_training":20000,"n_validation":3000}
+
+	method_params = { "size_layers" : [20,20,20], "epochs" : 2}
+	test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
+"""	
+"""
+    EXAMPLE FOR SVM
+    general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
+    for gamma in np.arange(0.0005,0.005,0.0005):
+        method_params = { "gamma" : gamma, "selected_features" : "all"}
+        test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
+	"""	
+    # parameters to
+
     # code to get and save the svm predictions.
     #Y = get_predictions_svm()
