@@ -34,3 +34,4 @@ accuracy;prediction_file;general_params;method_params
 0.905000;predictions_31_12_16h59m6;{'gamma': 0.0025, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
 0.913333;predictions_31_12_17h0m26;{'gamma': 0.0035, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
 0.911667;predictions_31_12_17h1m55;{'gamma': 0.0045000000000000005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
+0.944667;predictions_4_1_15h58m41;{};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}

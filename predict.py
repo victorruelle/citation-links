@@ -6,9 +6,14 @@ from sklearn.linear_model import LogisticRegression
 from keras.models import Sequential
 from keras.layers import Dense
 import numpy
-#activate log 
 import logging
 from sklearn import svm
+from sklearn.metrics import mean_squared_error
+import xgboost as xgb
+import pandas as pd
+import numpy as np
+
+#activate log 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
@@ -156,3 +161,29 @@ class NNClassifier(Classifier):
         return rounded
 
 
+class xgb_classifier(Classifier):
+    def __init__(self,features="all"):
+        super().__init__(features)
+		# fix random seed for reproducibility
+        numpy.random.seed(7)
+        self.model = xgb.XGBClassifier()
+        self.fitted = False
+
+    def fit(self,X_train,y_train,epochs=150):
+        #data_dmatrix = xgb.DMatrix(data=X_train,label=y_train)
+        #params = {"objective":"reg:logistic",'colsample_bytree': 0.3,'learning_rate': 0.1,
+        #        'max_depth': 5, 'alpha': 10, 'nthread':4}
+        #cv_results = xgb.cv(dtrain=data_dmatrix, params=params, nfold=5,
+        #    num_boost_round=50,early_stopping_rounds=10,metrics="rmse", as_pandas=True, seed=123)
+        self.model.fit(X_train,y_train)
+        self.fitted = True
+
+    def predict(self,X):
+        if not self.fitted:
+            print("ERROR: model not fitted")
+            return
+        predictions = self.model.predict(X)
+        return predictions
+
+    def evaluate(self,preds,y_test):
+        return np.sqrt(mean_squared_error(y_test, preds))

@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
+from feature_analysis import rank_features
 
 '''
 MAIN FILE
@@ -155,6 +156,9 @@ def test(general_params,method_params,X_training,y_training,X_validation,y_valid
         gamma = method_params["gamma"]
         model = pred.SVMClassifier(gamma=gamma,features=selected_features)
         model.fit(X_training,y_training)
+    if general_params["method"] == "XGB":
+        model = pred.xgb_classifier(features=selected_features)
+        model.fit(X_training,y_training)
     # Test the model, saves a prediction for the testing set and log everything
     accuracy = model.accuracy(X_validation,y_validation)
     print(accuracy)
@@ -216,6 +220,10 @@ if (__name__ == "__main__"):
     # TODO verify that Jacard is the first
     best_features = [11,15,6,14,2,8,5,3,4,9,7,13,10,12,0,1]
 
+    ranks = rank_features(np.array([y_training,y_training]).transpose(),y_training,[[0,"label",True],[1,"label",True]])
+    print(ranks)
+    
+
     """
     acc_SVC, acc_NN = [],[]
     for i in range(4,len(best_features)):
@@ -237,7 +245,7 @@ if (__name__ == "__main__"):
     confront_features(X_training[:2000],y_training[:2000],2,8,"scatter_plot","Common neighbors vs. Total Neighborhood")"""
 
 
-""" TO PLOT ACCURACY VS GAMMA
+    """ TO PLOT ACCURACY VS GAMMA
     general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
     name = "SVM_comparison"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
     gammas = np.arange(0.0005,0.005,0.001)
@@ -248,22 +256,24 @@ if (__name__ == "__main__"):
     plt.scatter(gammas, accuracies)
     plt.savefig("%s.png"%name)
     plt.show()
-"""
+    """
     
-""" EXAMPLE FOR NN
+    """ EXAMPLE FOR NN
     general_params = {"method":"NN","n_training":20000,"n_validation":3000,"selected_features":"all"}
 
     method_params = { "size_layers" : [20,20,20], "epochs" : 2}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-"""
-"""
+    """
+    """
     EXAMPLE FOR SVM
     general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
     for gamma in np.arange(0.0005,0.005,0.0005):
         method_params = { "gamma" : gamma, "selected_features" : "all"}
         test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-    """    
-    # parameters to
-
-    # code to get and save the svm predictions.
-    #Y = get_predictions_svm()
+    """
+    """
+    # EXAMPLE FOR XGBOOST
+    general_params = {"method":"XGB","n_training":20000,"n_validation":3000,"selected_features" : "all"}
+    method_params = {}
+    test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
+    """
