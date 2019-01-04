@@ -2,6 +2,7 @@ import csv
 from collections import defaultdict
 from gensim import corpora, models, similarities
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics.pairwise import cosine_similarity
 #activate log 
 import logging
 import os
@@ -163,7 +164,7 @@ def generate_meta_features(name,metas):
 def generate_text_features(name,metas):
 	# get all the lists inside meta
 	IDs, years, authors, corpus_abstract, corpus_title = metas
-	sims_abstract, sims_title = compute_similarities(corpus_abstract, corpus_title)
+	sims_abstract, sims_title = compute_similarities(tf_idf_model(corpus_abstract, corpus_title))
 
 	# load edges from the given data set
 	edges = loads_edges(name)
@@ -198,7 +199,7 @@ def generate_graph_features(name,metas):
 	print("ERROR: not supported yet")
 
 
-def compute_similarities(corpus_abstract,corpus_title):
+def tf_idf_model(corpus_abstract,corpus_title):
 	#take out the words that only appear once
 	frequency1,frequency2 = defaultdict(int),defaultdict(int)
 	for text in corpus_abstract:
@@ -227,14 +228,20 @@ def compute_similarities(corpus_abstract,corpus_title):
 	tfidf2 = models.TfidfModel(corpus_title)
 	tf_idf1 = tfidf1[corpus_abstract]
 	tf_idf2 = tfidf2[corpus_title]
+	
+	return [tf_idf1,tf_idf2]
 
+def cosineSimilarity(tf_idf):
+	return cosine_similarity(tf_idf[0]),cosine_similarity(tf_idf[1])
+
+def compute_similarities(tf_idf):
 	#now we convert to LSI model
 	#chose a number of topics, randomly set to 2
 	#if we change number of topics, we get a more precise similarity measure (not comparing them to two topics but to more)
-	lsi1 = models.LsiModel(tf_idf1, id2word=dictionary1, num_topics=2)
-	lsi2 = models.LsiModel(tf_idf2, id2word=dictionary2, num_topics=2)
-	corpus_abstract_lsi = lsi1[tf_idf1]
-	corpus_titles_lsi = lsi2[tf_idf2]
+	lsi1 = models.LsiModel(tf_idf[0], id2word=dictionary1, num_topics=2)
+	lsi2 = models.LsiModel(tf_idf[1], id2word=dictionary2, num_topics=2)
+	corpus_abstract_lsi = lsi1[tf_idf[0]]
+	corpus_titles_lsi = lsi2[tf_idf2[1]]
 
 	#transorm corpus_abstract to LSI space and index it
 	index1 = similarities.MatrixSimilarity(corpus_abstract_lsi)
