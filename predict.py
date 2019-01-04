@@ -69,6 +69,10 @@ class Classifier:
         print("Accuracy : ", accuracy)
         return accuracy
 
+    def set_params(self, **parameters):
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+        return self
 
 # 1) SVM CLASSIFIER
 
@@ -88,6 +92,10 @@ class SVMClassifier(Classifier):
             print("ERROR: model not fitted")
             return
         return self.classifier.predict(X[:,self.selected_features])
+
+    def get_params(self, deep=True):
+        return {"gamma": self.gamma}
+
 
 
 # 2) LOGITS CLASSIFIER
@@ -134,6 +142,9 @@ class NNClassifier(Classifier):
     def __init__(self,n_input,size_layers,features="all"):
         super().__init__(features)
 
+        self.n_input = n_input
+        self.size_layers = size_layers
+
         # create model
         self.model = Sequential()
         #Dense is fully connected, maybe make it half connected?
@@ -147,7 +158,7 @@ class NNClassifier(Classifier):
         self.model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
 
-    def fit(self,X_train,y_train,epochs=5):
+    def fit(self,X_train,y_train,epochs=2):
         self.fitted = True
         self.selected_features = self.features_to_array(list(range(X_train.shape[1])))
         self.model.fit(X_train[:,self.selected_features], y_train, epochs=epochs, batch_size=10)
@@ -160,13 +171,18 @@ class NNClassifier(Classifier):
         rounded = [int(round(x[0])) for x in predictions]
         return rounded
 
+    def get_params(self, deep=True):
+        return {"n_input": self.n_input, "size_layers": self.size_layers}
+
+
 
 class xgb_classifier(Classifier):
     def __init__(self,parameters,features="all"):
         super().__init__(features)
-		# fix random seed for reproducibility
+        # fix random seed for reproducibility
         numpy.random.seed(7)
-        self.model = xgb.XGBClassifier(silent=parameters["silent"], 
+        self.parameters = parameters
+        self.model = xgb.XGBClassifier(silent=parameters["silent"],
                       scale_pos_weight=parameters["scale_pos_weight"],
                       learning_rate=parameters["learning_rate"],  
                       colsample_bytree = parameters["colsample_bytree"],
@@ -185,13 +201,14 @@ class xgb_classifier(Classifier):
         #cv_results = xgb.cv(dtrain=data_dmatrix, params=params, nfold=5,
         #    num_boost_round=50,early_stopping_rounds=10,metrics="rmse", as_pandas=True, seed=123)
         eval_metric = ["auc","error"]
-        self.model.fit(X_train,y_train,eval_metric=eval_metric)
+        self.selected_features = self.features_to_array(list(range(X_train.shape[1])))
+        self.model.fit(X_train[:,self.selected_features],y_train,eval_metric=eval_metric)
         self.fitted = True
     
     def test(self,X_train,y_train,X_test,y_test):
-        eval_set = [(X_train, y_train), (X_test, y_test)]
+        eval_set = [(X_train[:,self.selected_features], y_train), (X_test[:,self.selected_features], y_test)]
         eval_metric = ["auc","error"]
-        model.fit(X_train, y_train, eval_metric=eval_metric, eval_set=eval_set, verbose=True)
+        self.model.fit(X_train[:,self.selected_features], y_train, eval_metric=eval_metric, eval_set=eval_set, verbose=True)
 
 
     def predict(self,X):
@@ -203,3 +220,6 @@ class xgb_classifier(Classifier):
 
     def evaluate(self,preds,y_test):
         return np.sqrt(mean_squared_error(y_test, preds))
+    
+    def get_params(self, deep=True):
+        return self.parameters
