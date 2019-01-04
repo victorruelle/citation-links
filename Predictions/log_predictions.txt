@@ -35,3 +35,10 @@ accuracy;prediction_file;general_params;method_params
 0.913333;predictions_31_12_17h0m26;{'gamma': 0.0035, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
 0.911667;predictions_31_12_17h1m55;{'gamma': 0.0045000000000000005, 'selected_features': 'all'};{'method': 'SVC', 'n_training': 20000, 'n_validation': 3000}
 0.944667;predictions_4_1_15h58m41;{};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}
+0.956000;predictions_4_1_16h26m47;{};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}
+0.949000;predictions_4_1_16h28m50;{};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}
+0.956667;predictions_4_1_16h30m53;{};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}
+0.948000;predictions_4_1_16h40m0;{'silent': True, 'scale_pos_weight': 1, 'learning_rate': 0.0005, 'colsample_bytree': 1, 'subsample': 0.8, 'objective': 'binary:logistic', 'n_estimators': 1500, 'reg_alpha': 0.3, 'max_depth': 5, 'gamma': 1};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}
+0.945667;predictions_4_1_16h42m33;{'silent': True, 'scale_pos_weight': 1, 'learning_rate': 0.001, 'colsample_bytree': 1, 'subsample': 0.8, 'objective': 'binary:logistic', 'n_estimators': 1000, 'reg_alpha': 0.3, 'max_depth': 5, 'gamma': 4};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}
+0.944667;predictions_4_1_16h43m37;{'silent': True, 'scale_pos_weight': 1, 'learning_rate': 0.001, 'colsample_bytree': 1, 'subsample': 0.8, 'objective': 'binary:logistic', 'n_estimators': 500, 'reg_alpha': 0.3, 'max_depth': 3, 'gamma': 4};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}
+0.950333;predictions_4_1_16h45m40;{'silent': True, 'scale_pos_weight': 1, 'learning_rate': 0.001, 'colsample_bytree': 1, 'subsample': 0.8, 'objective': 'binary:logistic', 'n_estimators': 500, 'reg_alpha': 0.3, 'max_depth': 4, 'gamma': 1};{'method': 'XGB', 'n_training': 20000, 'n_validation': 3000, 'selected_features': 'all'}

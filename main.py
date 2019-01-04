@@ -157,7 +157,7 @@ def test(general_params,method_params,X_training,y_training,X_validation,y_valid
         model = pred.SVMClassifier(gamma=gamma,features=selected_features)
         model.fit(X_training,y_training)
     if general_params["method"] == "XGB":
-        model = pred.xgb_classifier(features=selected_features)
+        model = pred.xgb_classifier(method_params,features=selected_features)
         model.fit(X_training,y_training)
     # Test the model, saves a prediction for the testing set and log everything
     accuracy = model.accuracy(X_validation,y_validation)
@@ -220,8 +220,8 @@ if (__name__ == "__main__"):
     # TODO verify that Jacard is the first
     best_features = [11,15,6,14,2,8,5,3,4,9,7,13,10,12,0,1]
 
-    ranks = rank_features(np.array([y_training,y_training]).transpose(),y_training,[[0,"label",True],[1,"label",True]])
-    print(ranks)
+    #ranks = rank_features(np.array([y_training,y_training]).transpose(),y_training,[[0,"label",True],[1,"label",True]])
+    #print(ranks)
     
 
     """
@@ -271,9 +271,17 @@ if (__name__ == "__main__"):
         method_params = { "gamma" : gamma, "selected_features" : "all"}
         test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
     """
-    """
+
     # EXAMPLE FOR XGBOOST
     general_params = {"method":"XGB","n_training":20000,"n_validation":3000,"selected_features" : "all"}
-    method_params = {}
+    method_params = {"silent":True, 
+                      "scale_pos_weight":1,
+                      "learning_rate":0.001,  
+                      "colsample_bytree" : 1,
+                      "subsample" : 0.8,
+                      "objective":'binary:logistic', 
+                      "n_estimators":500, 
+                      "reg_alpha" : 0.3,
+                      "max_depth":4, 
+                      "gamma":1}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-    """

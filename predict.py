@@ -162,21 +162,37 @@ class NNClassifier(Classifier):
 
 
 class xgb_classifier(Classifier):
-    def __init__(self,features="all"):
+    def __init__(self,parameters,features="all"):
         super().__init__(features)
 		# fix random seed for reproducibility
         numpy.random.seed(7)
-        self.model = xgb.XGBClassifier()
+        self.model = xgb.XGBClassifier(silent=parameters["silent"], 
+                      scale_pos_weight=parameters["scale_pos_weight"],
+                      learning_rate=parameters["learning_rate"],  
+                      colsample_bytree = parameters["colsample_bytree"],
+                      subsample = parameters["subsample"],
+                      objective= parameters["objective"], 
+                      n_estimators= parameters["n_estimators"], 
+                      reg_alpha = parameters["reg_alpha"],
+                      max_depth= parameters["max_depth"], 
+                      gamma= parameters["gamma"])
         self.fitted = False
 
-    def fit(self,X_train,y_train,epochs=150):
+    def fit(self,X_train,y_train):
         #data_dmatrix = xgb.DMatrix(data=X_train,label=y_train)
         #params = {"objective":"reg:logistic",'colsample_bytree': 0.3,'learning_rate': 0.1,
         #        'max_depth': 5, 'alpha': 10, 'nthread':4}
         #cv_results = xgb.cv(dtrain=data_dmatrix, params=params, nfold=5,
         #    num_boost_round=50,early_stopping_rounds=10,metrics="rmse", as_pandas=True, seed=123)
-        self.model.fit(X_train,y_train)
+        eval_metric = ["auc","error"]
+        self.model.fit(X_train,y_train,eval_metric=eval_metric)
         self.fitted = True
+    
+    def test(self,X_train,y_train,X_test,y_test):
+        eval_set = [(X_train, y_train), (X_test, y_test)]
+        eval_metric = ["auc","error"]
+        model.fit(X_train, y_train, eval_metric=eval_metric, eval_set=eval_set, verbose=True)
+
 
     def predict(self,X):
         if not self.fitted:
