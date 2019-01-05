@@ -132,6 +132,7 @@ def test(general_params,method_params,X_training,y_training,X_validation,y_valid
     assert "method" in general_params.keys()
     n_training = general_params["n_training"]
     n_validation = general_params["n_validation"]
+    print(general_params)
     selected_features = general_params["selected_features"]
     # takes random part of the data
     permutation_training = np.random.permutation(len(X_training))[:n_training]
@@ -160,7 +161,7 @@ def test(general_params,method_params,X_training,y_training,X_validation,y_valid
         model = pred.xgb_classifier(method_params,features=selected_features)
         model.fit(X_training,y_training)
     # Test the model, saves a prediction for the testing set and log everything
-    accuracy = model.accuracy(X_validation,y_validation)
+    accuracy = model.score(X_validation,y_validation)
     print(accuracy)
     pred_Y = model.predict(X_testing)
     pred_file = save_predictions(pred_Y)
@@ -208,36 +209,109 @@ def confront_features(features,labels,id1,id2,plot_type,name):
         plt.show()
 
 
+from sklearn import preprocessing
+def scaling_features(X_ref,X_to_scale):
+    std_scale = preprocessing.StandardScaler().fit(X_ref)
+    return(std_scale.transform(X_to_scale))
+
+from sklearn.feature_selection import RFECV
+from sklearn.linear_model import LogisticRegression
+def feature_selection(X,y):
+    model = LogisticRegression()
+    # Adding cross validation to choose the best number of features
+    rfe = RFECV(model,verbose=1,n_jobs=4)
+    rfe = rfe.fit(X, y)
+    features = []
+    for i,e in enumerate(rfe.support_):
+        if e: features.append(i)
+    return(features)
+
+
 if (__name__ == "__main__"):
 
+    normalization = False
+    n_features = 8
+
     X_training = np.array(vect.get_features_of_set("training",metas))
+    if normalization:
+        X_training = scaling_features(X_training,X_training)
     y_training = np.array([e[2] for e in training_set])
     X_validation = np.array(vect.get_features_of_set("validation",metas))
+    # scaling based on training set
+    if normalization:
+        X_validation = scaling_features(X_training,X_validation)
     y_validation = np.array([e[2] for e in validation_set])
     X_testing = np.array(vect.get_features_of_set("testing",metas))
+    # scaling based on training set
+    if normalization:
+        X_validation = scaling_features(X_training,X_validation)
+
+    #features_logistic_regression = feature_selection("logistic_regression",X_training,y_training)
+    #features_logistic_regression = [0, 1, 2, 3, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15]
+    #print(features)
+
 
     # features sorted according to information gain
-    # TODO verify that Jacard is the first
-    best_features = [11,15,6,14,2,8,5,3,4,9,7,13,10,12,0,1]
+    # TODO how it is computed ?
+    best_features_IG = [15,6,14,2,8,5,3,4,9,7,13,10,12,11,0,1]
+    # removing features that where not taken in logistic regression
+    #features_logistic_regression = feature_selection(X_training, y_training)
+    features_logistic_regression = [0, 1, 2, 3, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15]
+    features = []
+    for i in best_features_IG:
+        if i in features_logistic_regression:
+            features.append(i)
+    # plot accuracy of the different models depending on the number of features used
+    def plot_accuracy_features(best_features,name):
+        range = range(1, len(best_features))
+        n_training=20000
+        n_validation=3000
+        acc_SVC, acc_NN, acc_XGB = [], [], []
+        for i in range:
+            general_params_SVC = {"method": "SVC", "n_training": n_training, "n_validation": n_validation,
+                                  "selected_features": best_features[:i]}
+            method_params_SVC = {"gamma": 0.0005}
+            acc_SVC.append(
+                test(general_params_SVC, method_params_SVC, X_training, y_training, X_validation, y_validation, X_testing))
+            general_params_NN = {"method": "NN", "n_training": n_training, "n_validation": n_validation,
+                                 "selected_features": best_features[:i]}
+            method_params_NN = {"size_layers": [20, 20, 20], "epochs": 3}
+            acc_NN.append(
+                test(general_params_NN, method_params_NN, X_training, y_training, X_validation, y_validation, X_testing))
+            general_params_XGB = {"method": "XGB", "n_training": n_training, "n_validation": n_validation,
+                                  "selected_features": best_features[:i]}
+            method_params_XGB = {"silent": True,
+                                 "scale_pos_weight": 1,
+                                 "learning_rate": 0.001,
+                                 "colsample_bytree": 1,
+                                 "subsample": 0.8,
+                                 "objective": 'binary:logistic',
+                                 "n_estimators": 500,
+                                 "reg_alpha": 0.3,
+                                 "max_depth": 4,
+                                 "gamma": 1}
+            acc_XGB.append(
+                test(general_params_XGB, method_params_XGB, X_training, y_training, X_validation, y_validation, X_testing))
+        plt.plot(range, acc_NN, color="blue",label="Neural Network")
+        plt.plot(range, acc_SVC, color="red",label="SVC")
+        plt.plot(range, acc_XGB, color="green",label="XGBoost")
+        plt.legend("Accuracy of the different models depending on the number of features used (sorted on decreasing information gain)")
+        plt.savefig(name)
+        plt.show()
+    plot_accuracy_features(features,"Analysis/Accuracy(nb_features).png")
+    # deciding n_features on infomation gain and previous plot
+    n_features=7
+    # taking the n_features best features
+    features = features[:n_features]
+    print("Features used:")
+    for i,f in enumerate(features):
+        print("\t%d: %s" % (i,features_info[f][1]))
+    print()
 
     #ranks = rank_features(np.array([y_training,y_training]).transpose(),y_training,[[0,"label",True],[1,"label",True]])
     #print(ranks)
     
 
-    """
-    acc_SVC, acc_NN = [],[]
-    for i in range(4,len(best_features)):
-        general_params_SVC = {"method": "SVC", "n_training": 20000, "n_validation": 3000, "selected_features": best_features[:i]}
-        method_params_SVC = {"gamma": 0.0005}
-        acc_SVC.append(test(general_params_SVC, method_params_SVC, X_training, y_training, X_validation, y_validation, X_testing))
-        general_params_NN = {"method": "NN", "n_training": 20000, "n_validation": 3000, "selected_features": best_features[:i]}
-        method_params_NN = { "size_layers" : [20,20,20], "epochs": 3}
-        acc_NN.append(test(general_params_NN, method_params_NN, X_training, y_training, X_validation, y_validation, X_testing))
-    plt.scatter(range(4,len(best_features)),acc_NN,color="blue")
-    plt.scatter(range(4,len(best_features)),acc_SVC,color="red")
-    plt.savefig("models(nb_features).png")
-    plt.show()
-    """
 
     """confront_features(X_training[:2000],y_training[:2000],11,12,"scatter_plot","Delta year vs. Common authors")
     confront_features(X_training[:2000],y_training[:2000],13,14,"scatter_plot","Abstract similitude vs. Title similitude")
@@ -257,23 +331,25 @@ if (__name__ == "__main__"):
     plt.savefig("%s.png"%name)
     plt.show()
     """
-    
-    """ EXAMPLE FOR NN
-    general_params = {"method":"NN","n_training":20000,"n_validation":3000,"selected_features":"all"}
+
+    """
+    # EXAMPLE FOR NN
+    general_params = {"method":"NN","n_training":20000,"n_validation":3000,"selected_features":features,"normalization":normalization}
 
     method_params = { "size_layers" : [20,20,20], "epochs" : 2}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
     """
+
     """
-    EXAMPLE FOR SVM
-    general_params = {"method":"SVC","n_training":20000,"n_validation":3000}
-    for gamma in np.arange(0.0005,0.005,0.0005):
-        method_params = { "gamma" : gamma, "selected_features" : "all"}
-        test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
+    # EXAMPLE FOR SVM
+    general_params = {"method":"SVC","n_training":20000,"selected_features":features,"n_validation":3000,"normalization":normalization}
+    method_params = { "gamma" : 0.0005, "selected_features" : "all"}
+    test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
     """
 
+
     # EXAMPLE FOR XGBOOST
-    general_params = {"method":"XGB","n_training":20000,"n_validation":3000,"selected_features" : "all"}
+    general_params = {"method":"XGB","n_training":2000000,"n_validation":30000,"selected_features" : features}
     method_params = {"silent":True, 
                       "scale_pos_weight":1,
                       "learning_rate":0.001,  

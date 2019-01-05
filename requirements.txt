@@ -4,5 +4,5 @@ scipy
 plotly
 igraph
 sklearn
-csv
 networkit
+xgboost

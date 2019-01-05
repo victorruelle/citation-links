@@ -59,7 +59,7 @@ class Classifier:
     # will be defined in child classes
 
     # test accuracy of the model on (X,y)
-    def accuracy(self,X,y):
+    def score(self,X,y):
         predictions = self.predict(X)
         accuracy = 0
         for i in range(len(predictions)):
@@ -80,6 +80,7 @@ class SVMClassifier(Classifier):
     def __init__(self,gamma=0.001,features="all"):
         # features is here to restrain the features used by the classifier
         super().__init__(features)
+        self.gamma = gamma
         self.classifier = svm.SVC(gamma=gamma)
 
     def fit(self,X_training,y_training):
@@ -215,11 +216,11 @@ class xgb_classifier(Classifier):
         if not self.fitted:
             print("ERROR: model not fitted")
             return
-        predictions = self.model.predict(X)
+        predictions = self.model.predict(X[:,self.selected_features])
         return predictions
 
     def evaluate(self,preds,y_test):
         return np.sqrt(mean_squared_error(y_test, preds))
-    
+
     def get_params(self, deep=True):
         return self.parameters
