@@ -178,21 +178,28 @@ class NNClassifier(Classifier):
 
 
 class xgb_classifier(Classifier):
-    def __init__(self,parameters,features="all"):
+    def __init__(self,
+                 parameters={},
+                 learning_rate=0.01,
+                 colsample_bytree=1,
+                 subsample=0.8,
+                 n_estimators=800,
+                 max_depth=3,
+                 gamma=1,features="all"):
         super().__init__(features)
         # fix random seed for reproducibility
         numpy.random.seed(7)
         self.parameters = parameters
-        self.model = xgb.XGBClassifier(silent=parameters["silent"],
+        self.model = xgb.XGBClassifier(#silent=parameters["silent"],
                       scale_pos_weight=parameters["scale_pos_weight"],
-                      learning_rate=parameters["learning_rate"],  
-                      colsample_bytree = parameters["colsample_bytree"],
-                      subsample = parameters["subsample"],
+                      learning_rate=learning_rate,
+                      colsample_bytree = colsample_bytree,
+                      subsample = subsample,
                       objective= parameters["objective"], 
-                      n_estimators= parameters["n_estimators"], 
+                      n_estimators= n_estimators,
                       reg_alpha = parameters["reg_alpha"],
-                      max_depth= parameters["max_depth"], 
-                      gamma= parameters["gamma"])
+                      max_depth= max_depth,
+                      gamma= gamma)
         self.fitted = False
 
     def fit(self,X_train,y_train):
