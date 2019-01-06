@@ -229,6 +229,8 @@ def feature_selection(X,y):
 
 if (__name__ == "__main__"):
 
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
     normalization = False
     n_features = 8
 
@@ -354,21 +356,22 @@ if (__name__ == "__main__"):
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
     """
 
-    """
+
     # EXAMPLE FOR XGBOOST
-    general_params = {"method":"XGB","n_training":2000000,"n_validation":30000,"selected_features" : features}
-    method_params = {"silent":True, 
-                      "scale_pos_weight":1,
-                      "learning_rate":0.001,  
-                      "colsample_bytree" : 1,
-                      "subsample" : 0.8,
-                      "objective":'binary:logistic', 
-                      "n_estimators":500, 
-                      "reg_alpha" : 0.3,
-                      "max_depth":4, 
-                      "gamma":1}
+    general_params = {"method":"XGB","n_training":50000,"n_validation":3000,"selected_features" : features}
+    method_params = {
+                     'colsample_bytree': 0.95,
+                     'gamma': 1,
+                     'learning_rate': 0.01,
+                     'max_depth': 3,
+                     'n_estimators': 1500,
+                     'objective': 'binary:logistic',
+                     'reg_alpha': 0.3,
+                     'scale_pos_weight': 1,
+                     'silent': True,
+                     'subsample': 0.95}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-    """
+
 
     # fine tuning xgboost
     from sklearn.model_selection import GridSearchCV
@@ -376,7 +379,7 @@ if (__name__ == "__main__"):
     import xgboost as xgb
 
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-
+    
     X_training_bis=X_training[:50000,features]
     y_training_bis=y_training[:50000]
     general_params = {"method": "XGB", "n_training": 50000, "n_validation": 5000, "selected_features": features}
@@ -389,7 +392,7 @@ if (__name__ == "__main__"):
                       "reg_alpha" : [0.3],
                       "learning_rate":[0.01],
                       "colsample_bytree" :[1],
-                      "subsample" : [0.8],
+                      "subsample" : [0.95],
                       "n_estimators":list(range(100,1550,50)),
                       "max_depth":[3],
                       "gamma":[1]}
@@ -436,6 +439,7 @@ if (__name__ == "__main__"):
     param_grid["subsample"] = list(np.arange(0.7,1,0.25))
     param_grid["colsample_bytree"] = list(np.arange(0.70,1,0.25))
     param_grid["gamma"] = [1,2,5]
+    param_grid["objective"] = ["binary:logistic","binary:logitraw","binary:hinge"]
 
     gscv = GridSearchCV(xgb.XGBClassifier(),
                         param_grid,
@@ -444,7 +448,12 @@ if (__name__ == "__main__"):
                         verbose=True)
     gscv.fit(X_training_bis, y=y_training_bis)
     print("Best params: %s"%str(gscv.best_params_))
-    file = open("res_param.txt",w)
+    file = open("res_param.txt","w")
     for i in gscv.best_params_:
         file.write("%s: %s\n"%(str(i),str(gscv.best_params_[i])))
     file.close()
+
+    xgb.plot_importance(xg_reg)
+    plt.rcParams['figure.figsize'] = [5, 5]
+    plt.show()
+    plt.save("save.png")
