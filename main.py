@@ -390,7 +390,7 @@ if (__name__ == "__main__"):
                       "learning_rate":[0.01],
                       "colsample_bytree" :[1],
                       "subsample" : [0.8],
-                      "n_estimators":list(range(100,1050,50)),
+                      "n_estimators":list(range(100,1550,50)),
                       "max_depth":[3],
                       "gamma":[1]}
     gscv = GridSearchCV(xgb.XGBClassifier(),
@@ -428,13 +428,13 @@ if (__name__ == "__main__"):
     treshold = 0.002
     for i in range(len(scores)):
         if scores[i] > max - treshold:
-            param_grid["max_depth"] = [i]
+            param_grid["max_depth"] = [list(range(3,11))[i]]
             break
     print("Max depth: %d"%param_grid["max_depth"][0])
 
     param_grid["learning_rate"] = [0.001,0.002,0.005,0.01]
-    param_grid["subsample"] = list(range(0.8,1.025,0.25))
-    param_grid["colsample_bytree"] = list(range(0.8,1.25,0.25))
+    param_grid["subsample"] = list(np.arange(0.7,1,0.25))
+    param_grid["colsample_bytree"] = list(np.arange(0.70,1,0.25))
     param_grid["gamma"] = [1,2,5]
 
     gscv = GridSearchCV(xgb.XGBClassifier(),
@@ -444,3 +444,7 @@ if (__name__ == "__main__"):
                         verbose=True)
     gscv.fit(X_training_bis, y=y_training_bis)
     print("Best params: %s"%str(gscv.best_params_))
+    file = open("res_param.txt",w)
+    for i in gscv.best_params_:
+        file.write("%s: %s\n"%(str(i),str(gscv.best_params_[i])))
+    file.close()
