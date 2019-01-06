@@ -317,6 +317,9 @@ if (__name__ == "__main__"):
         print("\t%d: %s" % (i, features_info[f][1]))
     print()
 
+
+    features = list(range(16))
+
     #ranks = rank_features(np.array([y_training,y_training]).transpose(),y_training,[[0,"label",True],[1,"label",True]])
     #print(ranks)
     
@@ -453,7 +456,3 @@ if (__name__ == "__main__"):
         file.write("%s: %s\n"%(str(i),str(gscv.best_params_[i])))
     file.close()
 
-    xgb.plot_importance(xg_reg)
-    plt.rcParams['figure.figsize'] = [5, 5]
-    plt.show()
-    plt.save("save.png")
