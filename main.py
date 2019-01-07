@@ -309,7 +309,7 @@ if (__name__ == "__main__"):
 
     #plot_accuracy_features(features, "Analysis/Accuracy(nb_features).png")
     # deciding n_features on infomation gain and previous plot
-    n_features = 7
+    n_features = 8
     # taking the n_features best features
     features = features[:n_features]
     print("Features used:")
@@ -361,98 +361,99 @@ if (__name__ == "__main__"):
 
 
     # EXAMPLE FOR XGBOOST
-    general_params = {"method":"XGB","n_training":50000,"n_validation":3000,"selected_features" : features}
+    general_params = {"method":"XGB","n_training":20000,"n_validation":3000,"selected_features" : "all"}
     method_params = {
-                     'colsample_bytree': 0.95,
+                     'colsample_bytree': 1,
                      'gamma': 1,
-                     'learning_rate': 0.01,
-                     'max_depth': 3,
+                     'learning_rate': 0.0005,
+                     'max_depth': 8,
                      'n_estimators': 1500,
                      'objective': 'binary:logistic',
                      'reg_alpha': 0.3,
-                     'scale_pos_weight': 1,
+                     'scale_pos_weight': 0.9,
                      'silent': True,
-                     'subsample': 0.95}
+                     'subsample': 0.8}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
+	
+	
+	# fine tuning xgboost
+"""
+	from sklearn.model_selection import GridSearchCV
+	import scipy
+	import xgboost as xgb
 
+	os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-    # fine tuning xgboost
-    from sklearn.model_selection import GridSearchCV
-    import scipy
-    import xgboost as xgb
+	X_training_bis=X_training[:50000,features]
+	y_training_bis=y_training[:50000]
+	general_params = {"method": "XGB", "n_training": 50000, "n_validation": 5000, "selected_features": features}
 
-    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-    
-    X_training_bis=X_training[:50000,features]
-    y_training_bis=y_training[:50000]
-    general_params = {"method": "XGB", "n_training": 50000, "n_validation": 5000, "selected_features": features}
+	common_params = {}
 
-    common_params = {}
+	param_grid = {"silent":[True],
+					  "scale_pos_weight":[1],
+					  "objective":['binary:logistic'],
+					  "reg_alpha" : [0.3],
+					  "learning_rate":[0.01],
+					  "colsample_bytree" :[1],
+					  "subsample" : [0.95],
+					  "n_estimators":list(range(100,1550,50)),
+					  "max_depth":[3],
+					  "gamma":[1]}
+	gscv = GridSearchCV(xgb.XGBClassifier(),
+				 param_grid,
+				 cv=5,
+				 n_jobs=6,
+				 verbose=True)
+	gscv.fit(X_training_bis,y=y_training_bis)
+	param_grid["n_estimators"]=[gscv.best_params_["n_estimators"]]
+	print("Optimal n_estimators : %d"%param_grid["n_estimators"][0])
 
-    param_grid = {"silent":[True],
-                      "scale_pos_weight":[1],
-                      "objective":['binary:logistic'],
-                      "reg_alpha" : [0.3],
-                      "learning_rate":[0.01],
-                      "colsample_bytree" :[1],
-                      "subsample" : [0.95],
-                      "n_estimators":list(range(100,1550,50)),
-                      "max_depth":[3],
-                      "gamma":[1]}
-    gscv = GridSearchCV(xgb.XGBClassifier(),
-                 param_grid,
-                 cv=5,
-                 n_jobs=6,
-                 verbose=True)
-    gscv.fit(X_training_bis,y=y_training_bis)
-    param_grid["n_estimators"]=[gscv.best_params_["n_estimators"]]
-    print("Optimal n_estimators : %d"%param_grid["n_estimators"][0])
+	# for max_depth maximized it without overfitting
+	param_grid["max_depth"] = list(range(3,11))
+	scores = []
+	for i,m_d in enumerate(param_grid["max_depth"]):
+		this_param={}
+		for key in param_grid:
+			if key == "max_depth":
+				this_param["max_depth"] = m_d
+			else:
+				print(param_grid[key])
+				this_param[key]=param_grid[key][0]
 
-    # for max_depth maximized it without overfitting
-    param_grid["max_depth"] = list(range(3,11))
-    scores = []
-    for i,m_d in enumerate(param_grid["max_depth"]):
-        this_param={}
-        for key in param_grid:
-            if key == "max_depth":
-                this_param["max_depth"] = m_d
-            else:
-                print(param_grid[key])
-                this_param[key]=param_grid[key][0]
+		score = test(general_params,
+					 this_param,
+					 X_training,
+					 y_training,
+					 X_validation,
+					 y_validation,
+					 X_testing)
+		scores.append(score)
+	print(scores)
+	# first index withing [max-treshold,max]
+	max = max(scores)
+	treshold = 0.002
+	for i in range(len(scores)):
+		if scores[i] > max - treshold:
+			param_grid["max_depth"] = [list(range(3,11))[i]]
+			break
+	print("Max depth: %d"%param_grid["max_depth"][0])
 
-        score = test(general_params,
-                     this_param,
-                     X_training,
-                     y_training,
-                     X_validation,
-                     y_validation,
-                     X_testing)
-        scores.append(score)
-    print(scores)
-    # first index withing [max-treshold,max]
-    max = max(scores)
-    treshold = 0.002
-    for i in range(len(scores)):
-        if scores[i] > max - treshold:
-            param_grid["max_depth"] = [list(range(3,11))[i]]
-            break
-    print("Max depth: %d"%param_grid["max_depth"][0])
+	param_grid["learning_rate"] = [0.001,0.002,0.005,0.01]
+	param_grid["subsample"] = list(np.arange(0.7,1,0.25))
+	param_grid["colsample_bytree"] = list(np.arange(0.70,1,0.25))
+	param_grid["gamma"] = [1,2,5]
+	param_grid["objective"] = ["binary:logistic","binary:logitraw","binary:hinge"]
 
-    param_grid["learning_rate"] = [0.001,0.002,0.005,0.01]
-    param_grid["subsample"] = list(np.arange(0.7,1,0.25))
-    param_grid["colsample_bytree"] = list(np.arange(0.70,1,0.25))
-    param_grid["gamma"] = [1,2,5]
-    param_grid["objective"] = ["binary:logistic","binary:logitraw","binary:hinge"]
-
-    gscv = GridSearchCV(xgb.XGBClassifier(),
-                        param_grid,
-                        cv=5,
-                        n_jobs=6,
-                        verbose=True)
-    gscv.fit(X_training_bis, y=y_training_bis)
-    print("Best params: %s"%str(gscv.best_params_))
-    file = open("res_param.txt","w")
-    for i in gscv.best_params_:
-        file.write("%s: %s\n"%(str(i),str(gscv.best_params_[i])))
-    file.close()
-
+	gscv = GridSearchCV(xgb.XGBClassifier(),
+						param_grid,
+						cv=5,
+						n_jobs=6,
+						verbose=True)
+	gscv.fit(X_training_bis, y=y_training_bis)
+	print("Best params: %s"%str(gscv.best_params_))
+	file = open("res_param.txt","w")
+	for i in gscv.best_params_:
+		file.write("%s: %s\n"%(str(i),str(gscv.best_params_[i])))
+	file.close()
+	"""
