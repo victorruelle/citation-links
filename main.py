@@ -59,8 +59,9 @@ IDs = [int(element[0]) for element in node_info]
 years = [int(element[1]) for element in node_info]
 corpus_title = [element[2].split(" ") for element in node_info]
 authors = [element[3].split(" ") for element in node_info]
+journals = [element[4] for element in node_info]
 corpus_abstract = [element[5].split(" ") for element in node_info]
-metas = [IDs,years,authors,corpus_abstract,corpus_title]
+metas = [IDs,years,authors,corpus_abstract,corpus_title,journals]
 
 
 
@@ -74,7 +75,6 @@ def get_predictions_svm():
     print("---- running...")
     list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
     print("---- similarity matrices computed")
-    metas = [IDs,list_sims1,list_sims2,years,authors]
     data_set,Y_train = [],[]
     for id1,id2,y in training_set:
         Y.append(y)
@@ -92,7 +92,6 @@ def get_predictions_NN():
     print("---- running...")
     list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
     print("---- similarity matrices computed")
-    metas = [IDs,list_sims1,list_sims2,years,authors]
     data_set,Y_train = [],[]
     for id1,id2,y in training_set:
         Y_train.append(y)

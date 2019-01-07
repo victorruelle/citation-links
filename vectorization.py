@@ -14,7 +14,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 TL;DR
 get_features_of_set(name,metas) to get the features vector for a given set
  - name: training|validation|testing
- - metas: IDs, years, authors, corpus_abstract, corpus_title
+ - metas: IDs, years, authors, corpus_abstract, corpus_title, journals
 
 THIS FILE CONTAINS METHODS TO COMPUTE DESCRIPTORS FOR OUR DATA
 
@@ -131,7 +131,8 @@ def generate_meta_features(name,metas):
 	edges = loads_edges(name)
 
 	# metas contain all the information lists
-	IDs,years,authors,_,_ = metas
+	IDs,years,authors,_,_,journals = metas
+
 
 	features = []
 	for edges in edges:
@@ -150,6 +151,12 @@ def generate_meta_features(name,metas):
 		n = len(set(a1).intersection(set(a2)))
 		x.append(n)
 
+		# in same journal 
+		j = 0
+		if journals[id1] != "" and journals[id2] != "" and journals[id1] == journals[id2]:
+			j = 1
+		x.append(j)
+
 		features.append(x)
 
 	saving_path = "Data/Features/meta_features_%s.csv"%name
@@ -163,7 +170,7 @@ def generate_meta_features(name,metas):
 
 def generate_text_features(name,metas):
 	# get all the lists inside meta
-	IDs, years, authors, corpus_abstract, corpus_title = metas
+	IDs, years, authors, corpus_abstract, corpus_title, _ = metas
 	sims_abstract, sims_title = compute_similarities(tf_idf_model(corpus_abstract, corpus_title))
 
 	# load edges from the given data set
