@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import os
 from datetime import datetime
 from feature_analysis import rank_features
+from sklearn import preprocessing
+from sklearn.feature_selection import RFECV
+from sklearn.linear_model import LogisticRegression
 
 '''
 MAIN FILE
@@ -69,62 +72,6 @@ metas = [IDs,years,authors,corpus_abstract,corpus_title,journals]
 # 1.2) METHODS TO GET PREDICTIONS USING VECTORIZATION METHODS FROM vectorization.py
 #      AND PREDICTION METHODS FROM prediction.py
 
-
-# SVM prediction
-def get_predictions_svm():
-    print("---- running...")
-    list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
-    print("---- similarity matrices computed")
-    data_set,Y_train = [],[]
-    for id1,id2,y in training_set:
-        Y.append(y)
-        data_set.append([id1,id2])
-    X_train = vect.features_all(data_set,metas)
-    print("---- all features have been computed")
-    model = pred.train_svm(X_train,Y_train)
-    print("---- svm model has been trained")
-    X_test = testing_set
-    Y_test = pred.predict_svm(model,X_test)
-    print("---- predictions have been made")
-    return(Y_test)
-
-def get_predictions_NN():
-    print("---- running...")
-    list_sims1, list_sims2 = vect.compute_similarities(corpus_abstract,corpus_title)
-    print("---- similarity matrices computed")
-    data_set,Y_train = [],[]
-    for id1,id2,y in training_set:
-        Y_train.append(y)
-        data_set.append([id1,id2])
-    X_train = vect.features_all(data_set,metas)
-    print("---- all features have been computed")
-    X_test = vect.features_all(testing_set,metas)
-    NN_pred = pred.create_NN(X_train,Y_train,X_test)
-    return(NN_pred)
-
-############################
-# 1.3) METHOD TO SAVE PREDICITONS IN THE RIGHT FORMAT
-
-def save_predictions(Y):
-    # saves a prediction list in the right format
-    # assumes predictions have been made in the "natural" order (that of testing_set)
-    name = "predictions_"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
-    with open("Predictions/"+name+".txt",'w') as out:
-        out.write("id,category\n")
-        for i in range(len(Y)):
-            out.write(str(i)+","+str(int(Y[i]))+"\n")
-    print("prediction successfully written to Predictions/"+name)
-    return name
-
-def log_predictions(file_name,general_params,method_params,accuracy):
-    log_file = "Predictions/log_predictions.txt"
-    headers = "accuracy;prediction_file;general_params;method_params\n"
-    if not os.path.isfile(log_file):
-        open(log_file,"w").write(headers)
-    # the result is added to the log file to keep a trace of every test
-    file = open(log_file,"a")
-    file.write("%f;%s;%s;%s\n" % (accuracy,file_name,str(general_params),str(method_params)))
-
 def test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing):
     print("entering test function...")
     # test a given set of params and save the output"
@@ -167,6 +114,29 @@ def test(general_params,method_params,X_training,y_training,X_validation,y_valid
     log_predictions(pred_file,method_params,general_params,accuracy)
     return accuracy
 
+############################
+# 1.3) METHOD TO SAVE PREDICITONS IN THE RIGHT FORMAT
+
+def save_predictions(Y):
+    # saves a prediction list in the right format
+    # assumes predictions have been made in the "natural" order (that of testing_set)
+    name = "predictions_"+str(datetime.now().day)+"_"+str(datetime.now().month)+"_"+str(datetime.now().hour)+"h"+str(datetime.now().minute)+"m"+str(datetime.now().second)
+    with open("Predictions/"+name+".txt",'w') as out:
+        out.write("id,category\n")
+        for i in range(len(Y)):
+            out.write(str(i)+","+str(int(Y[i]))+"\n")
+    print("prediction successfully written to Predictions/"+name)
+    return name
+
+def log_predictions(file_name,general_params,method_params,accuracy):
+    log_file = "Predictions/log_predictions.txt"
+    headers = "accuracy;prediction_file;general_params;method_params\n"
+    if not os.path.isfile(log_file):
+        open(log_file,"w").write(headers)
+    # the result is added to the log file to keep a trace of every test
+    file = open(log_file,"a")
+    file.write("%f;%s;%s;%s\n" % (accuracy,file_name,str(general_params),str(method_params)))
+
 
 ### 2. DATA MINING AND VIZ
 
@@ -208,13 +178,10 @@ def confront_features(features,labels,id1,id2,plot_type,name):
         plt.show()
 
 
-from sklearn import preprocessing
 def scaling_features(X_ref,X_to_scale):
     std_scale = preprocessing.StandardScaler().fit(X_ref)
     return(std_scale.transform(X_to_scale))
 
-from sklearn.feature_selection import RFECV
-from sklearn.linear_model import LogisticRegression
 def feature_selection(X,y):
     model = LogisticRegression()
     # Adding cross validation to choose the best number of features
