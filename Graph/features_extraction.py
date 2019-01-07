@@ -119,6 +119,7 @@ SAME_COMMUNITY = 10
 TOTAL_NEIGHBORS = 11
 U_DEGREE = 12
 V_DEGREE = 13
+BETWEENNESS_CENTRALITY = 14
 # many methods
 methods = [ADAMIC_ADAR, ADJUSTED_RAND, ALGEBRAIC_DISTANCE, 
            COMMON_NEIGHBORS, JACCARD, KATZ,
@@ -178,6 +179,16 @@ def createAllPredictors(G):
         predictors.append(linkPredictor(G,method))
     return predictors
 
+# betweenness feature 
+betweenness_instance = centrality.Betweenness(G)
+betweennes_scores = instance.edgeScores(G)   
+betweenness_instance_ = centrality.Betweenness(G_)
+betweennes_scores_ = instance.edgeScores(G_)
+
+
+
+
+
 # return the value of the edge for each of the different scores
 maxi = 100000
 def edgeToVector(predictors,u,v):
@@ -187,6 +198,12 @@ def edgeToVector(predictors,u,v):
         if math.isnan(s):
             s = maxi
         result.append(s)
+    # append other features
+    if setting in ['training', 'validation']:
+        result.append(betweenness_scores[uv])
+    else :
+        result.append(betweenness_scores_[uv])
+    result.append( 1 if G.hasEdge(u,u) else 0)
     return result
 
 # return the scores of several edges
@@ -219,6 +236,10 @@ def exportScores(name,predictors,edges,output_file):
 
 ### 6. For training/validation/testing set, computes the score values of every edges (even the 0 ones)
 
-#exportScores("training",predictors,training_edges,features_training) 
-#exportScores("validation",predictors,validation_edges,features_validation) 
-exportScores("testing",predictors_,testing_edges,features_testing)
+setting = "testing"
+if setting == "training":
+    exportScores("training",predictors,training_edges,features_training) 
+if setting == "validation":
+    exportScores("validation",predictors,validation_edges,features_validation) 
+if setting == "testing":
+    exportScores("testing",predictors_,testing_edges,features_testing)

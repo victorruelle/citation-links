@@ -361,17 +361,18 @@ if (__name__ == "__main__"):
 
     # EXAMPLE FOR XGBOOST
     general_params = {"method":"XGB","n_training":20000,"n_validation":3000,"selected_features" : "all"}
-    method_params = {
-                     'colsample_bytree': 1,
-                     'gamma': 1,
-                     'learning_rate': 0.0005,
-                     'max_depth': 8,
-                     'n_estimators': 1500,
-                     'objective': 'binary:logistic',
-                     'reg_alpha': 0.3,
-                     'scale_pos_weight': 0.9,
-                     'silent': True,
-                     'subsample': 0.8}
+    method_params = {"silent":True, 
+                      "scale_pos_weight":0.90,
+                      "learning_rate":0.01,  
+                      "colsample_bytree" : 1,
+                      "subsample" : 0.9,
+                      "objective":'binary:logistic', 
+                      "n_estimators":1500, 
+                      "reg_alpha" : 0.3,
+                      "max_depth":5, 
+                      "gamma":1,
+                      "lamba":3,
+                      "tree_method" : "gpu_exact"}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
 	
 	
