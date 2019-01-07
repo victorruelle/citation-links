@@ -5,6 +5,7 @@ import sklearn.utils.testing as t
 from sklearn.linear_model import LogisticRegression
 from keras.models import Sequential
 from keras.layers import Dense
+from keras import optimizers
 import numpy
 import logging
 from sklearn import svm
@@ -156,7 +157,9 @@ class NNClassifier(Classifier):
 
         # Compile model
         #use adaboost as an optimizer? need further investigation
-        self.model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+        opt = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=True)
+        #self.model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+        self.model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
 
 
     def fit(self,X_train,y_train,epochs=2):
@@ -193,24 +196,31 @@ class xgb_classifier(Classifier):
                       reg_alpha = parameters["reg_alpha"],
                       max_depth= parameters["max_depth"], 
                       gamma= parameters["gamma"])
+        self.params = {"silent":parameters["silent"],
+                      "scale_pos_weight":parameters["scale_pos_weight"],
+                      "learning_rate":parameters["learning_rate"],  
+                      "colsample_bytree" : parameters["colsample_bytree"],
+                      "subsample" : parameters["subsample"],
+                      "objective": parameters["objective"], 
+                      "n_estimators": parameters["n_estimators"], 
+                      "reg_alpha" : parameters["reg_alpha"],
+                      "max_depth": parameters["max_depth"], 
+                      "gamma": parameters["gamma"],
+                      "nthread" : 4}
         self.fitted = False
 
     def fit(self,X_train,y_train):
-        #data_dmatrix = xgb.DMatrix(data=X_train,label=y_train)
-        #params = {"objective":"reg:logistic",'colsample_bytree': 0.3,'learning_rate': 0.1,
-        #        'max_depth': 5, 'alpha': 10, 'nthread':4}
+        data_dmatrix = xgb.DMatrix(data=X_train,label=y_train)
+        #params = {"objective":"reg:logistic",'colsample_bytree': 0.4 ,'learning_rate': 0.001,
+        #        'max_depth': 8, 'alpha': 0.5, 'nthread':4, 'silent':True, 'scale_pos_weight':0.9}
         #cv_results = xgb.cv(dtrain=data_dmatrix, params=params, nfold=5,
         #    num_boost_round=50,early_stopping_rounds=10,metrics="rmse", as_pandas=True, seed=123)
         eval_metric = ["auc","error"]
         self.selected_features = self.features_to_array(list(range(X_train.shape[1])))
         self.model.fit(X_train[:,self.selected_features],y_train,eval_metric=eval_metric)
+        #self.model = xgb.train(self.params,data_dmatrix)
         self.fitted = True
-    
-    def test(self,X_train,y_train,X_test,y_test):
-        eval_set = [(X_train[:,self.selected_features], y_train), (X_test[:,self.selected_features], y_test)]
-        eval_metric = ["auc","error"]
-        self.model.fit(X_train[:,self.selected_features], y_train, eval_metric=eval_metric, eval_set=eval_set, verbose=True)
-
+        #print("cv_results",cv_results)
 
     def predict(self,X):
         if not self.fitted:

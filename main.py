@@ -229,22 +229,8 @@ def feature_selection(X,y):
 
 if (__name__ == "__main__"):
 
-    normalization = False
+    normalization = True
     n_features = 8
-
-    X_training = np.array(vect.get_features_of_set("training",metas))
-    if normalization:
-        X_training = scaling_features(X_training,X_training)
-    y_training = np.array([e[2] for e in training_set])
-    X_validation = np.array(vect.get_features_of_set("validation",metas))
-    # scaling based on training set
-    if normalization:
-        X_validation = scaling_features(X_training,X_validation)
-    y_validation = np.array([e[2] for e in validation_set])
-    X_testing = np.array(vect.get_features_of_set("testing",metas))
-    # scaling based on training set
-    if normalization:
-        X_validation = scaling_features(X_training,X_validation)
 
     #features_logistic_regression = feature_selection("logistic_regression",X_training,y_training)
     #features_logistic_regression = [0, 1, 2, 3, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15]
@@ -261,7 +247,22 @@ if (__name__ == "__main__"):
         if i in features_logistic_regression:
             features.append(i)
 
+    X_training = np.array(vect.get_features_of_set("training",metas))
+    if normalization:
+        X_training = scaling_features(X_training,X_training)
+    y_training = np.array([e[2] for e in training_set])
+    X_validation = np.array(vect.get_features_of_set("validation",metas))
+    # scaling based on training set
+    if normalization:
+        X_validation = scaling_features(X_training,X_validation)
+    y_validation = np.array([e[2] for e in validation_set])
+    X_testing = np.array(vect.get_features_of_set("testing",metas))
+    # scaling based on training set
+    if normalization:
+        X_validation = scaling_features(X_training,X_validation)
 
+
+    """
     # plot accuracy of the different models depending on the number of features used
     def plot_accuracy_features(best_features, name):
         range = range(1, len(best_features))
@@ -307,14 +308,16 @@ if (__name__ == "__main__"):
 
     #plot_accuracy_features(features, "Analysis/Accuracy(nb_features).png")
     # deciding n_features on infomation gain and previous plot
+    """
     n_features = 7
     # taking the n_features best features
     features = features[:n_features]
+    """
     print("Features used:")
     for i, f in enumerate(features):
         print("\t%d: %s" % (i, features_info[f][1]))
     print()
-
+    """
     #ranks = rank_features(np.array([y_training,y_training]).transpose(),y_training,[[0,"label",True],[1,"label",True]])
     #print(ranks)
     
@@ -339,13 +342,13 @@ if (__name__ == "__main__"):
     plt.show()
     """
 
-    """
+    '''
     # EXAMPLE FOR NN
-    general_params = {"method":"NN","n_training":20000,"n_validation":3000,"selected_features":features,"normalization":normalization}
+    general_params = {"method":"NN","n_training":100000,"n_validation":3000,"selected_features":features,"normalization":normalization}
 
-    method_params = { "size_layers" : [20,20,20], "epochs" : 2}
+    method_params = { "size_layers" : [20,20,20,20,20,20,20,20,20,20], "epochs" : 10}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
-    """
+    '''
 
     """
     # EXAMPLE FOR SVM
@@ -354,17 +357,19 @@ if (__name__ == "__main__"):
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
     """
 
-
+    
     # EXAMPLE FOR XGBOOST
-    general_params = {"method":"XGB","n_training":2000000,"n_validation":30000,"selected_features" : features}
+    general_params = {"method":"XGB","n_training":50000,"n_validation":3000,"selected_features" : features}
     method_params = {"silent":True, 
-                      "scale_pos_weight":1,
-                      "learning_rate":0.001,  
+                      "scale_pos_weight":0.90,
+                      "learning_rate":0.01,  
                       "colsample_bytree" : 1,
-                      "subsample" : 0.8,
+                      "subsample" : 0.9,
                       "objective":'binary:logistic', 
-                      "n_estimators":500, 
+                      "n_estimators":1500, 
                       "reg_alpha" : 0.3,
-                      "max_depth":4, 
-                      "gamma":1}
+                      "max_depth":5, 
+                      "gamma":1,
+                      "lamba":3,
+                      "tree_method" : "gpu_exact"}
     test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing)
