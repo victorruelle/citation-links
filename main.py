@@ -73,46 +73,49 @@ metas = [IDs,years,authors,corpus_abstract,corpus_title,journals]
 #      AND PREDICTION METHODS FROM prediction.py
 
 def test(general_params,method_params,X_training,y_training,X_validation,y_validation,X_testing):
-    print("entering test function...")
-    # test a given set of params and save the output"
-    assert "method" in general_params.keys()
-    n_training = general_params["n_training"]
-    n_validation = general_params["n_validation"]
-    print(general_params)
-    selected_features = general_params["selected_features"]
-    # takes random part of the data
-    permutation_training = np.random.permutation(len(X_training))[:n_training]
-    permutation_validation = np.random.permutation(len(X_validation))[:n_validation]
-    X_training = X_training[permutation_training,:]
-    y_training = y_training[permutation_training]
-    X_validation = X_validation[permutation_validation,:]
-    y_validation = y_validation[permutation_validation]
-    print(general_params)
-    print(method_params)
-    # For each method, create the model with the specific parameters
-    if general_params["method"] == "NN":
-        size_layers = method_params["size_layers"]
-        epochs = method_params["epochs"]
-        if selected_features == "all":
-            size_input = X_training.shape[1]
-        else:
-            size_input = len(selected_features)
-        model = pred.NNClassifier(size_input,size_layers,features=selected_features)
-        model.fit(X_training,y_training,epochs=epochs)
-    if general_params["method"] == "SVC":
-        gamma = method_params["gamma"]
-        model = pred.SVMClassifier(gamma=gamma,features=selected_features)
-        model.fit(X_training,y_training)
-    if general_params["method"] == "XGB":
-        model = pred.xgb_classifier(method_params,features=selected_features)
-        model.fit(X_training,y_training)
-    # Test the model, saves a prediction for the testing set and log everything
-    accuracy = model.score(X_validation,y_validation)
-    print(accuracy)
-    pred_Y = model.predict(X_testing)
-    pred_file = save_predictions(pred_Y)
-    log_predictions(pred_file,method_params,general_params,accuracy)
-    return accuracy
+	print("entering test function...")
+	# test a given set of params and save the output"
+	assert "method" in general_params.keys()
+	n_training = general_params["n_training"]
+	n_validation = general_params["n_validation"]
+	print(general_params)
+	selected_features = general_params["selected_features"]
+	# takes random part of the data
+	permutation_training = np.random.permutation(len(X_training))[:n_training]
+	permutation_validation = np.random.permutation(len(X_validation))[:n_validation]
+	print("permutation : ", permutation_training)
+	print("X training : ", X_training)
+	X_training = X_training[permutation_training,:]
+	
+	y_training = y_training[permutation_training]
+	X_validation = X_validation[permutation_validation,:]
+	y_validation = y_validation[permutation_validation]
+	print(general_params)
+	print(method_params)
+	# For each method, create the model with the specific parameters
+	if general_params["method"] == "NN":
+		size_layers = method_params["size_layers"]
+		epochs = method_params["epochs"]
+		if selected_features == "all":
+			size_input = X_training.shape[1]
+		else:
+			size_input = len(selected_features)
+		model = pred.NNClassifier(size_input,size_layers,features=selected_features)
+		model.fit(X_training,y_training,epochs=epochs)
+	if general_params["method"] == "SVC":
+		gamma = method_params["gamma"]
+		model = pred.SVMClassifier(gamma=gamma,features=selected_features)
+		model.fit(X_training,y_training)
+	if general_params["method"] == "XGB":
+		model = pred.xgb_classifier(method_params,features=selected_features)
+		model.fit(X_training,y_training)
+	# Test the model, saves a prediction for the testing set and log everything
+	accuracy = model.score(X_validation,y_validation)
+	print(accuracy)
+	pred_Y = model.predict(X_testing)
+	pred_file = save_predictions(pred_Y)
+	log_predictions(pred_file,method_params,general_params,accuracy)
+	return accuracy
 
 ############################
 # 1.3) METHOD TO SAVE PREDICITONS IN THE RIGHT FORMAT
@@ -360,7 +363,7 @@ if (__name__ == "__main__"):
 	param_grid = {"silent":[True],
 					  "scale_pos_weight":[1],
 					  "objective":['binary:logistic'],
-					  "reg_alpha" : [0.3],
+x					  "reg_alpha" : [0.3],
 					  "learning_rate":[0.01],
 					  "colsample_bytree" :[1],
 					  "subsample" : [0.95],

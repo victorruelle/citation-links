@@ -171,7 +171,7 @@ def generate_meta_features(name,metas):
 def generate_text_features(name,metas):
 	# get all the lists inside meta
 	IDs, years, authors, corpus_abstract, corpus_title, _ = metas
-	sims_abstract, sims_title = compute_similarities(tf_idf_model(corpus_abstract, corpus_title))
+	sims_abstract, sims_title = compute_similarities(tf_idf_model(corpus_abstract, corpus_title), corpus_abstract, corpus_title)
 
 	# load edges from the given data set
 	edges = loads_edges(name)
@@ -205,6 +205,10 @@ def generate_graph_features(name,metas):
 	# TODO import code from Graph/features/extraction.py
 	print("ERROR: not supported yet")
 
+
+"""
+SUPPORT FUNCTIONS FOR TEXT FEATURES
+"""
 
 def tf_idf_model(corpus_abstract,corpus_title):
 	#take out the words that only appear once
@@ -241,14 +245,18 @@ def tf_idf_model(corpus_abstract,corpus_title):
 def cosineSimilarity(tf_idf):
 	return cosine_similarity(tf_idf[0]),cosine_similarity(tf_idf[1])
 
-def compute_similarities(tf_idf):
+def compute_similarities(tf_idf,corpus_abstract,corpus_title):
+	# create a dictionary, meaning a specific id for every word
+	dictionary1 = corpora.Dictionary(corpus_abstract)
+	dictionary2 = corpora.Dictionary(corpus_title)
+
 	#now we convert to LSI model
 	#chose a number of topics, randomly set to 2
 	#if we change number of topics, we get a more precise similarity measure (not comparing them to two topics but to more)
-	lsi1 = models.LsiModel(tf_idf[0], id2word=dictionary1, num_topics=2)
-	lsi2 = models.LsiModel(tf_idf[1], id2word=dictionary2, num_topics=2)
+	lsi1 = models.LsiModel(tf_idf[0], id2word=dictionary1, num_topics=100)
+	lsi2 = models.LsiModel(tf_idf[1], id2word=dictionary2, num_topics=100)
 	corpus_abstract_lsi = lsi1[tf_idf[0]]
-	corpus_titles_lsi = lsi2[tf_idf2[1]]
+	corpus_titles_lsi = lsi2[tf_idf[1]]
 
 	#transorm corpus_abstract to LSI space and index it
 	index1 = similarities.MatrixSimilarity(corpus_abstract_lsi)
@@ -265,7 +273,6 @@ def compute_similarities(tf_idf):
 
 	return list_sims1,list_sims2
 	#save_sims(list_sims1,list_sims2)
-
 
 def save_sims(list_sims1,list_sims2):
 	with open("Data/Processed/list_sims1.dat","w") as sims1:
@@ -303,6 +310,8 @@ def recover_list_sims():
 			for i in range(1,len(line)):
 				list_sims2[-1][-1].append(float(line[i]))
 	return list_sims1,list_sims2
+
+
 
 
 
